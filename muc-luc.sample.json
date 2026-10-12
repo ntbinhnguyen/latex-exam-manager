@@ -1,0 +1,128 @@
+[
+  {
+    "id": "T010",
+    "parent_id": "",
+    "title": "Toán 10",
+    "order": 1
+  },
+  {
+    "id": "T010.01",
+    "parent_id": "T010",
+    "title": "CHƯƠNG I. MỆNH ĐỀ VÀ TẬP HỢP.",
+    "order": 1
+  },
+  {
+    "id": "T010.01.01",
+    "parent_id": "T010.01",
+    "title": "Bài 1: Mệnh Đề",
+    "order": 1
+  },
+  {
+    "id": "T010.01.01.D01",
+    "parent_id": "T010.01.01",
+    "title": "Dạng 1. Phát biểu, xét ĐS & Phủ định của mệnh đề logic",
+    "order": 1
+  },
+  {
+    "id": "T010.01.01.D02",
+    "parent_id": "T010.01.01",
+    "title": "Dạng 2. Phát biểu, xét ĐS của mệnh đề chứa biến",
+    "order": 2
+  },
+  {
+    "id": "T010.01.01.D03",
+    "parent_id": "T010.01.01",
+    "title": "Dạng 3. Phát biểu, xét ĐS của mệnh đề kéo theo, mệnh đề đảo, ĐK cần & đủ",
+    "order": 3
+  },
+  {
+    "id": "T010.01.01.D04",
+    "parent_id": "T010.01.01",
+    "title": "Dạng 4. Phát biểu, xét ĐS của mệnh đề tương đương",
+    "order": 4
+  },
+  {
+    "id": "T010.01.01.D05",
+    "parent_id": "T010.01.01",
+    "title": "Dạng 5. Phát biểu, xét ĐS của mệnh đề \"với mọi/ tồn tại\" & Phủ định của chúng",
+    "order": 5
+  },
+  {
+    "id": "T010.01.01.D06",
+    "parent_id": "T010.01.01",
+    "title": "Dạng 6. Toán thực tế về Mệnh đề",
+    "order": 6
+  },
+  {
+    "id": "T010.01.02",
+    "parent_id": "T010.01",
+    "title": "Bài 2. Tập Hợp & Các Phép Toán Trên Tập Hợp",
+    "order": 2
+  },
+  {
+    "id": "T010.01.02.D01",
+    "parent_id": "T010.01.02",
+    "title": "Dạng 1. Lý thuyết & Các khái niệm cơ bản Tập hợp",
+    "order": 1
+  },
+  {
+    "id": "T010.01.02.D02",
+    "parent_id": "T010.01.02",
+    "title": "Dạng 2. Các tập hợp số & Mối quan hệ giữa chúng",
+    "order": 2
+  },
+  {
+    "id": "T010.01.02.D03",
+    "parent_id": "T010.01.02",
+    "title": "Dạng 3. Giao, hợp, hiệu, bù các tập hợp hữu hạn phần tử",
+    "order": 3
+  },
+  {
+    "id": "T010.01.02.D03.05",
+    "parent_id": "T010.01.02.D03",
+    "title": "[5] Kết hợp nhiều phép toán trên tập hữu hạn phần tử",
+    "order": 1
+  },
+  {
+    "id": "T012",
+    "parent_id": "",
+    "title": "Toán 12",
+    "order": 2
+  },
+  {
+    "id": "T012.01",
+    "parent_id": "T012",
+    "title": "CHƯƠNG I. ỨNG DỤNG ĐẠO HÀM ĐỂ KHẢO SÁT VÀ VẼ ĐỒ THỊ HÀM SỐ",
+    "order": 1
+  },
+  {
+    "id": "T012.02",
+    "parent_id": "T012",
+    "title": "CHƯƠNG II. VECTƠ VÀ HỆ TRỤC TỌA ĐỘ TRONG KHÔNG GIAN",
+    "order": 2
+  },
+  {
+    "id": "T012.03",
+    "parent_id": "T012",
+    "title": "CHƯƠNG III. CÁC SỐ ĐẶC TRƯNG ĐO MỨC ĐỘ PHÂN TÁN CỦA MẪU SỐ LIỆU GHÉP NHÓM",
+    "order": 3
+  },
+  {
+    "id": "T012.04",
+    "parent_id": "T012",
+    "title": "CHƯƠNG IV. NGUYÊN HÀM VÀ TÍCH PHÂN",
+    "order": 4
+  },
+  {
+    "id": "T012.05",
+    "parent_id": "T012",
+    "title": "CHƯƠNG V. PHƯƠNG PHÁP TỌA ĐỘ TRONG KHÔNG GIAN",
+    "order": 5
+  },
+  {
+    "id": "T012.06",
+    "parent_id": "T012",
+    "title": "CHƯƠNG VI. XÁC SUẤT CÓ ĐIỀU KIỆN",
+    "order": 6
+  }
+]

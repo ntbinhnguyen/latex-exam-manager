@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+sqlalchemy>=2.0
+pip install "psycopg[binary]"
+pydantic-settings
+python-multipart
+alembic
