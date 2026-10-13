@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+.venv
+venv
+.git
+node_modules
+uploads
+*.pdf
+*.aux
+*.log

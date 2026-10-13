@@ -1,0 +1,1270 @@
+[
+    {
+      "id": "T2",
+      "title": "TOÁN 12",
+      "children": [
+        {
+          "id": "T2.C1",
+          "title": "Chương 1. Ứng dụng đạo hàm để khảo sát và vẽ đồ thị hàm số",
+          "children": [
+            {
+              "id": "T2.C1.B1",
+              "title": "Bài 1. Tính đơn điệu và cực trị của hàm số",
+              "children": [
+                {
+                  "id": "T2.C1.B1.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M1.T2.C1.B1.01",
+                      "title": "Dạng 01. Tìm khoảng đơn điệu của hàm số bậc ba dựa vào BBT"
+                    },
+                    {
+                      "id": "TN.M1.T2.C1.B1.02",
+                      "title": "Dạng 02. Tìm khoảng đơn điệu của hàm số trùng phương dựa vào BBT"
+                    },
+                    {
+                      "id": "TN.M1.T2.C1.B1.03",
+                      "title": "Dạng 03. Tìm khoảng đơn điệu của hàm số phân thức bậc nhất trên bậc nhất dựa vào BBT"
+                    },
+                    {
+                      "id": "TN.M1.T2.C1.B1.04",
+                      "title": "Dạng 04. Tìm khoảng đơn điệu của hàm số phân thức bậc hai trên bậc nhất dựa vào BBT"
+                    },
+                    {
+                      "id": "TN.M1.T2.C1.B1.05",
+                      "title": "Dạng 05. Tìm khoảng đơn điệu của hàm số dựa vào bảng xét dấu đạo hàm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.06",
+                      "title": "Dạng 06. Tìm khoảng đơn điệu của hàm số dựa vào biểu thức đạo hàm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.07",
+                      "title": "Dạng 07. Tìm khoảng đơn điệu của hàm số bậc ba"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.08",
+                      "title": "Dạng 08. Tìm khoảng đơn điệu của hàm số trùng phương"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.09",
+                      "title": "Dạng 09. Tìm khoảng đơn điệu của hàm số phân thức bậc nhất trên bậc nhất"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.10",
+                      "title": "Dạng 10. Tìm khoảng đơn điệu của hàm số phân thức bậc hai trên bậc nhất"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.11",
+                      "title": "Dạng 11. Tìm khoảng đơn điệu của hàm số bậc ba dựa vào đồ thị"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.12",
+                      "title": "Dạng 12. Tìm khoảng đơn điệu của hàm số trùng phương dựa vào đồ thị"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.13",
+                      "title": "Dạng 13. Tìm khoảng đơn điệu của hàm số phân thức bậc nhất trên bậc nhất dựa vào đồ thị"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.14",
+                      "title": "Dạng 14. Tìm khoảng đơn điệu của hàm số phân thức bậc hai trên bậc nhất dựa vào đồ thị"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.15",
+                      "title": "Dạng 15. Tìm khoảng đơn điệu của hàm số dựa vào đồ thị đạo hàm"
+                    },
+                    {
+                      "id": "TN.M1.T2.C1.B1.16",
+                      "title": "Dạng 16. Tìm cực trị của hàm số bậc ba dựa vào BBT"
+                    },
+                    {
+                      "id": "TN.M1.T2.C1.B1.17",
+                      "title": "Dạng 17. Tìm cực trị của hàm số trùng phương dựa vào BBT"
+                    },
+                    {
+                      "id": "TN.M1.T2.C1.B1.18",
+                      "title": "Dạng 18. Tìm cực trị của hàm số phân thức bậc hai trên bậc nhất dựa vào BBT"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.19",
+                      "title": "Dạng 19. Tìm cực trị của hàm số dựa vào bảng xét dấu đạo hàm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.20",
+                      "title": "Dạng 20. Tìm cực trị của hàm số dựa vào biểu thức đạo hàm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.21",
+                      "title": "Dạng 21. Tìm số điểm cực trị của hàm số dựa vào biểu thức đạo hàm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.22",
+                      "title": "Dạng 22. Tìm cực trị của hàm số bậc ba"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.23",
+                      "title": "Dạng 23. Tìm cực trị của hàm số trùng phương"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.24",
+                      "title": "Dạng 24. Tìm cực trị của hàm số phân thức bậc hai trên bậc nhất"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.25",
+                      "title": "Dạng 25. Tìm cực trị của hàm số bậc ba dựa vào đồ thị"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.26",
+                      "title": "Dạng 26. Tìm cực trị của hàm số trùng phương dựa vào đồ thị"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B1.27",
+                      "title": "Dạng 27: Cho đồ thị f'(x), tìm cực trị của f(x)"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C1.B1.TLN",
+                  "title": "Trả lời ngắn",
+                  "children": [
+                    {
+                      "id": "TLN.M2.T2.C1.B1.01",
+                      "title": "Dạng 01. Cho hàm số bậc 3, tính giá trị biểu thức liên quan giá trị cực trị"
+                    },
+                    {
+                      "id": "TLN.M2.T2.C1.B1.02",
+                      "title": "Dạng 02. Cho hàm số bậc 3, tính khoảng cách 2 cực trị"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C1.B2",
+              "title": "Bài 2. Giá trị lớn nhất và giá trị nhỏ nhất của hàm số",
+              "children": [
+                {
+                  "id": "T2.C1.B2.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M2.T2.C1.B2.01",
+                      "title": "Dạng 01. Tìm GTLN - GTNN của hàm số bậc 3 trên đoạn"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B2.02",
+                      "title": "Dạng 02. Tìm GTLN - GTNN của hàm số trùng phương trên đoạn"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B2.03",
+                      "title": "Dạng 03. Tìm GTLN - GTNN của hàm số phân thức trên đoạn"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B2.04",
+                      "title": "Dạng 04. Tìm GTLN - GTNN của hàm số hữu tỉ bậc hai trên bậc nhất trên đoạn"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B2.05",
+                      "title": "Dạng 05. Tìm GTLN - GTNN của hàm số y=(ax^2+bx+c)e^x trên đoạn"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B2.06",
+                      "title": "Dạng 06. Tìm GTLN - GTNN của hàm số y=ln(ax^2+bx+c) trên đoạn"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B2.07",
+                      "title": "Dạng 07. Tìm GTLN - GTNN của hàm số y = sqrt(b-x) + sqrt(x-a)"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C1.B2.TLN",
+                  "title": "Trả lời ngắn",
+                  "children": [
+                    {
+                      "id": "TLN.M2.T2.C1.B2.01",
+                      "title": "Dạng 01. Tìm GTLN-GTNN của hàm số bậc 3 trên đoạn"
+                    },
+                    {
+                      "id": "TLN.M3.T2.C1.B2.05",
+                      "title": "Dạng 05. Tính chi phí xây bể nước thấp nhất"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C1.B3",
+              "title": "Bài 3. Đường tiệm cận của đồ thị hàm số",
+              "children": [
+                {
+                  "id": "T2.C1.B3.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M2.T2.C1.B3.01",
+                      "title": "Dạng 01. Tìm tiệm cận của đồ thị hàm số phân thức bậc nhất trên bậc nhất dựa vào BBT"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B3.02",
+                      "title": "Dạng 02. Tìm tiệm cận của đồ thị hàm số phân thức bậc nhất trên bậc nhất dựa vào đồ thị"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B3.03",
+                      "title": "Dạng 03. Tìm tiệm cận của đồ thị hàm số phân thức bậc nhất trên bậc nhất"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B3.04",
+                      "title": "Dạng 04. Tìm tiệm cận của đồ thị hàm số phân thức bậc hai trên bậc nhất dựa vào đồ thị (chưa xong)"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B3.05",
+                      "title": "Dạng 05. Tìm tiệm cận của đồ thị hàm số phân thức bậc hai trên bậc nhất"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B3.06",
+                      "title": "Dạng 06. Tìm tiệm cận của đồ thị hàm số dựa vào BBT"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C1.B3.TLN",
+                  "title": "Trả lời ngắn",
+                  "children": [
+                    {
+                      "id": "TLN.M2.T2.C1.B3.01",
+                      "title": "Dạng 01. Đếm số tiệm cận của đồ thị hàm số phân thức có chứa căn"
+                    },
+                    {
+                      "id": "TLN.M2.T2.C1.B3.02",
+                      "title": "Dạng 02. Cho pt tiệm cận xiên y=ax+b. Tính giá trị biểu thức chứa a và b"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C1.B4",
+              "title": "Bài 4. Khảo sát sự biến thiên và vẽ đồ thị của hàm số",
+              "children": [
+                {
+                  "id": "T2.C1.B4.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M2.T2.C1.B4.01",
+                      "title": "Dạng 01. Nhận dạng hàm số bậc 3 dựa vào BBT"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B4.02",
+                      "title": "Dạng 02. Nhận dạng hàm số bậc 3 dựa vào đồ thị"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B4.03",
+                      "title": "Dạng 03. Nhận dạng hàm số phân thức bậc nhất trên bậc nhất dựa vào BBT"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B4.04",
+                      "title": "Dạng 04. Nhận dạng hàm số phân thức bậc nhất trên bậc nhất dựa vào đồ thị"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B4.05",
+                      "title": "Dạng 05. Nhận dạng hàm số phân thức bậc hai trên bậc nhất dựa vào BBT"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B4.06",
+                      "title": "Dạng 06. Nhận dạng hàm số phân thức bậc hai trên bậc nhất dựa vào đồ thị"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B4.07",
+                      "title": "Dạng 07. Tìm tâm đối xứng của đồ thị hàm số bậc 3"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B4.08",
+                      "title": "Dạng 08. Tìm tâm đối xứng của đồ thị hàm số phân thức bậc nhất trên bậc nhất"
+                    },
+                    {
+                      "id": "TN.M2.T2.C1.B4.09",
+                      "title": "Dạng 09. Tìm tâm đối xứng của đồ thị hàm số phân thức bậc hai trên bậc nhất"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C1.B5",
+              "title": "Bài 5. Ôn tập chương 1",
+              "children": [
+                {
+                  "id": "T2.C1.B5.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M2.T2.C1.B5.01",
+                      "title": "Dạng 01. Cho hàm số bậc 3. Truy vấn: đạo hàm, đơn điệu, cực trị, tâm đối xứng"
+                    },
+                    {
+                      "id": "DS.M2.T2.C1.B5.02",
+                      "title": "Dạng 2. Cho đồ thị hàm số phân thức. Truy vấn: tiệm cận, tâm đối xứng, giao điểm với trục toạ độ, tìm các hệ số."
+                    },
+                    {
+                      "id": "DS.M2.T2.C1.B5.03",
+                      "title": "Dạng 03. Cho hàm số phân thức hữu tỉ. Truy vấn: đạo hàm, đơn điệu, cực trị, tâm đối xứng"
+                    },
+                    {
+                      "id": "DS.M2.T2.C1.B5.04",
+                      "title": "Dạng 04. Cho hàm số phân thức hữu tỉ. Truy vấn: TXĐ, đạo hàm, TCX, khoảng cách 2 cực trị"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "T2.C2",
+          "title": "Chương 2. Tọa độ của vectơ trong không gian",
+          "children": [
+            {
+              "id": "T2.C2.B2",
+              "title": "Bài 2. Toạ độ của vectơ",
+              "children": [
+                {
+                  "id": "T2.C2.B2.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M1.T2.C2.B2.01",
+                      "title": "Dạng 01. Đọc toạ độ điểm theo các vectơ đơn vị i, j, k"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B2.02",
+                      "title": "Dạng 02. Đọc toạ độ vectơ theo các vectơ đơn vị i, j, k"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B2.03",
+                      "title": "Dạng 03. Tìm hình chiếu của điểm trên các mặt phẳng tọa độ"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B2.04",
+                      "title": "Dạng 04. Tìm hình chiếu của điểm trên các trục tọa độ"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B2.05",
+                      "title": "Dạng 05. Tìm điểm đối xứng qua các mặt phẳng tọa độ"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B2.06",
+                      "title": "Dạng 06. Tìm điểm đối xứng qua các trục tọa độ"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B2.07",
+                      "title": "Dạng 07. Tìm tọa độ điểm nằm trên các mặt phẳng tọa độ"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B2.08",
+                      "title": "Dạng 08. Tìm tọa độ vectơ khi biết toạ độ điểm đầu và điểm cuối"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B2.09",
+                      "title": "Dạng 09. Tìm tọa độ điểm M sao cho vt(AM) = vt(u)"
+                    },
+                    {
+                      "id": "TN.M2.T2.C2.B2.10",
+                      "title": "Dạng 10. Tìm tọa độ điểm D sao cho ABCD là hình bình hành"
+                    },
+                    {
+                      "id": "TN.M2.T2.C2.B2.11",
+                      "title": "Dạng 11. Tìm tọa độ các đỉnh của hình hộp"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C2.B2.TLN",
+                  "title": "Trả lời ngắn",
+                  "children": [
+                    {
+                      "id": "TLN.M2.T2.C2.B2.01",
+                      "title": "Dạng 01. Gắn hệ trục toạ độ cho hình hộp chữ nhật. Tìm toạ độ điểm P(a; b; c) và tính giá trị biểu thức T chứa a, b, c"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C2.B3",
+              "title": "Bài 3. Biểu thức toạ độ của các phép toán vectơ",
+              "children": [
+                {
+                  "id": "T2.C2.B3.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M2.T2.C2.B3.01",
+                      "title": "Dạng 01. Tìm tọa độ vt(x) = m.vt(a) + n.vt(b)"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B3.02",
+                      "title": "Dạng 02. Tính độ dài vectơ vt(u)"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B3.03",
+                      "title": "Dạng 03. Tính độ dài vectơ vt(AB)"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B3.04",
+                      "title": "Dạng 04. Tìm tọa độ trung điểm của đoạn thẳng AB"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B3.05",
+                      "title": "Dạng 05. Tìm tọa độ trọng tâm của tam giác ABC"
+                    },
+                    {
+                      "id": "TN.M1.T2.C2.B3.06",
+                      "title": "Dạng 06. Tính tích vô hướng của hai vectơ"
+                    },
+                    {
+                      "id": "TN.M2.T2.C2.B3.07",
+                      "title": "Dạng 07. Tính góc của hai vectơ"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C2.B4",
+              "title": "Bài 4. Ôn tập chương 2",
+              "children": [
+                {
+                  "id": "T2.C2.B4.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M2.T2.C2.B4.01",
+                      "title": "Dạng 01. Gắn hệ trục toạ độ cho hình hộp chữ nhật. Truy vấn: toạ độ điểm, vectơ, tích vô hướng"
+                    },
+                    {
+                      "id": "DS.M2.T2.C2.B4.02",
+                      "title": "Dạng 02. Cho hình bình hành biết tọa độ 3 điểm. Truy vấn: toạ độ điểm còn lại, tọa độ vectơ, trung điểm, góc 2 vectơ"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "T2.C3",
+          "title": "Chương 3. Các số đặc trưng đo mức độ phân tán của mẫu số liệu ghép nhóm",
+          "children": [
+            {
+              "id": "T2.C3.B1",
+              "title": "Bài 1. Khoảng biến thiên và khoảng tứ phân vị của mẫu số liệu ghép nhóm",
+              "children": [
+                {
+                  "id": "T2.C3.B1.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M1.T2.C3.B1.01",
+                      "title": "Dạng 01. Tính khoảng biển thiên của mẫu số liệu ghép nhóm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C3.B1.02",
+                      "title": "Dạng 02. Tìm tứ phân vị thứ nhất của mẫu số liệu ghép nhóm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C3.B1.03",
+                      "title": "Dạng 03. Tìm tứ phân vị thứ ba của mẫu số liệu ghép nhóm"
+                    },
+                    {
+                      "id": "TN.M1.T2.C3.B1.04",
+                      "title": "Dạng 04. Tìm khoảng tứ phân vị của mẫu số liệu ghép nhóm (lý thuyết)"
+                    },
+                    {
+                      "id": "TN.M2.T2.C3.B1.05",
+                      "title": "Dạng 05. Tìm khoảng tứ phân vị của mẫu số liệu ghép nhóm"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C3.B1.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M2.T2.C3.B1.01",
+                      "title": "Dạng 01. Truy vấn khoảng biến thiên, các tứ phân vị và khoảng tứ phân vị"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C3.B1.TLN",
+                  "title": "Trả lời ngắn",
+                  "children": [
+                    {
+                      "id": "TLN.M2.T2.C3.B1.01",
+                      "title": "Dạng 01. Tính tứ phân vị thứ nhất"
+                    },
+                    {
+                      "id": "TLN.M2.T2.C3.B1.02",
+                      "title": "Dạng 02. Tính tứ phân vị thứ hai"
+                    },
+                    {
+                      "id": "TLN.M2.T2.C3.B1.03",
+                      "title": "Dạng 03. Tính tứ phân vị thứ ba"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C3.B2",
+              "title": "Bài 2. Phương sai và độ lệch chuẩn của mẫu số liệu ghép nhóm",
+              "children": [
+                {
+                  "id": "T2.C3.B2.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M2.T2.C3.B2.01",
+                      "title": "Dạng 01. Tính phương sai của mẫu số liệu ghép nhóm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C3.B2.02",
+                      "title": "Dạng 02. Tìm độ lệch chuẩn của mẫu số liệu ghép nhóm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C3.B2.03",
+                      "title": "Dạng 03. Tìm số trung bình của mẫu số liệu ghép nhóm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C3.B2.04",
+                      "title": "Dạng 04. Tìm khoảng chứa phương sai của mẫu số liệu ghép nhóm"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C3.B2.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M2.T2.C3.B2.01",
+                      "title": "Dạng 01. Cho 2 bảng số liệu. Truy vấn khoảng biến thiên, các tứ phân vị, phương sai, độ ổn định"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "T2.C4",
+          "title": "Chương 4. Nguyên hàm - Tích phân",
+          "children": [
+            {
+              "id": "T2.C4.B1",
+              "title": "Bài 1. Nguyên hàm",
+              "children": [
+                {
+                  "id": "T2.C4.B1.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M1.T2.C4.B1.01",
+                      "title": "Dạng 01. Nhận dạng công thức nguyên hàm"
+                    },
+                    {
+                      "id": "TN.M1.T2.C4.B1.02",
+                      "title": "Dạng 02. Tìm nguyên hàm của hàm số đa thức"
+                    },
+                    {
+                      "id": "TN.M1.T2.C4.B1.03",
+                      "title": "Dạng 03. Tìm nguyên hàm của hàm số dạng 1/(ax + b)"
+                    },
+                    {
+                      "id": "TN.M1.T2.C4.B1.04",
+                      "title": "Dạng 04. Tìm nguyên hàm của hàm số luỹ thừa"
+                    },
+                    {
+                      "id": "TN.M1.T2.C4.B1.05",
+                      "title": "Dạng 05. Tìm nguyên hàm của hàm số mũ"
+                    },
+                    {
+                      "id": "TN.M1.T2.C4.B1.06",
+                      "title": "Dạng 06. Tìm nguyên hàm dạng a.sin(x) + b.cos(x)"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B1.07",
+                      "title": "Dạng 07. Tìm nguyên hàm của hàm số đa thức thoả điều kiện cho trước"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B1.08",
+                      "title": "Dạng 08. Tìm nguyên hàm dạng a.x + b/x^2 thoả điều kiện cho trước"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B1.09",
+                      "title": "Dạng 09. Tìm nguyên hàm dạng a.x + b/sin^2 x thoả điều kiện cho trước"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B1.10",
+                      "title": "Dạng 10. Tìm nguyên hàm dạng a.sin(x) + b.cos(x) thoả điều kiện cho trước"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B1.11",
+                      "title": "Dạng 11. Tìm nguyên hàm dạng k/(ax + b) thoả điều kiện cho trước"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B1.12",
+                      "title": "Dạng 12. Tìm nguyên hàm dạng kết hợp: đa thức + mũ, lượng giác, …"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B1.13",
+                      "title": "Dạng 13. Tìm nguyên hàm dạng (f(x) + g(x))/x^n"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B1.14",
+                      "title": "Dạng 14. Tìm nguyên hàm dạng asinx + bcosx thỏa điều kiện cho trước"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C4.B1.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M3.T2.C4.B1.01",
+                      "title": "Dạng 01. Bài toán tăng trưởng (Cây cà chua)"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C4.B2",
+              "title": "Bài 2. Tích phân",
+              "children": [
+                {
+                  "id": "T2.C4.B2.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M1.T2.C4.B2.01",
+                      "title": "Dạng 01. Tính tích phân bằng định nghĩa"
+                    },
+                    {
+                      "id": "TN.M1.T2.C4.B2.02",
+                      "title": "Dạng 02. Cho giá trị tích phân và F(a), tính F(b)"
+                    },
+                    {
+                      "id": "TN.M1.T2.C4.B2.03",
+                      "title": "Dạng 03. Tích phân dạng nối đuôi"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B2.04",
+                      "title": "Dạng 04. Tích phân dạng a.f(x) + b.g(x)"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B2.05",
+                      "title": "Dạng 05. Cho giá trị của tích phân dạng a.f(x) + b.x, tính tích phân f(x)"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B2.06",
+                      "title": "Dạng 06. Cho giá trị tích phân của f(x), tính tích phân dạng a.f(x) + b.x"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B2.07",
+                      "title": "Dạng 07. Cho giá trị tích phân f'(x) và f(a), tính f(b)"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B2.08",
+                      "title": "Dạng 08.Tính tích phân dạng x^n"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B2.09",
+                      "title": "Dạng 09. Tính tích phân dạng k/x^n"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B2.10",
+                      "title": "Dạng 10. Cho giá trị tích phân f(x), tính tích phân k.f(x)"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C4.B2.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M2.T2.C4.B2.01",
+                      "title": "Dạng 01. Cho đồ thị vận tốc, truy vấn vận tốc, quãng đường của vật trong khoảng thời gian t"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C4.B2.TLN",
+                  "title": "Trả lời ngắn",
+                  "children": [
+                    {
+                      "id": "TLN.M3.T2.C4.B2.01",
+                      "title": "Dạng 01. Cho tích phân f(x), tìm các hệ số a, b, c"
+                    },
+                    {
+                      "id": "TLN.M2.T2.C4.B2.02",
+                      "title": "Dạng 02. Tính quãng đường di chuyển của ô tô trong khoảng thời gian t"
+                    },
+                    {
+                      "id": "TLN.M2.T2.C4.B2.03",
+                      "title": "Dạng 03. Cho hàm số f(x) và F(a). Tính F(b)"
+                    },
+                    {
+                      "id": "TLN.M2.T2.C4.B2.04",
+                      "title": "Dạng 04. Tính quãng đường di chuyển của vật trong khoảng thời gian t"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C4.B3",
+              "title": "Bài 3. Ứng dụng hình học của tích phân",
+              "children": [
+                {
+                  "id": "T2.C4.B3.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M1.T2.C4.B3.01",
+                      "title": "Dạng 01. Công thức tính diện tích hình phẳng"
+                    },
+                    {
+                      "id": "TN.M1.T2.C4.B3.02",
+                      "title": "Dạng 02. Công thức tính thể tích khối tròn xoay"
+                    },
+                    {
+                      "id": "TN.M1.T2.C4.B3.03",
+                      "title": "Dạng 03. Ghép công thức tính diện tích hình phẳng giới hạn bởi f(x), Ox, x = a, x = b"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B3.04",
+                      "title": "Dạng 04. Tính diện tích hình phẳng giới hạn bởi đồ thị hàm số bậc 2, trục Ox"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B3.05",
+                      "title": "Dạng 05. Tìm công thức diện tích hình phẳng giới hạn bởi y = kx^2, y = m; x = a và x = b"
+                    },
+                    {
+                      "id": "TN.M2.T2.C4.B3.06",
+                      "title": "Dạng 06. Tìm công thức tính diện tích dựa vào hình vẽ có một đồ thị"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C4.B3.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M2.T2.C4.B3.01",
+                      "title": "Dạng 01. Cho bảng biến thiên. Truy vấn: Định nghĩa tích phân, tính chất, ứng dụng"
+                    },
+                    {
+                      "id": "DS.M2.T2.C4.B3.02",
+                      "title": "Dạng 02. Cho F(x) và F(a), F(b). Truy vấn: Định nghĩa tích phân, tính chất"
+                    },
+                    {
+                      "id": "DS.M3.T2.C4.B3.03",
+                      "title": "Dạng 03. Bài toán chuyển động. Truy vấn: gia tốc, quãng đường, quãng đường phanh"
+                    },
+                    {
+                      "id": "DS.M3.T2.C4.B3.04",
+                      "title": "Dạng 04. Cho mặt cắt bức tường. Truy vấn: đỉnh parabol, pt parabol, chi phí sơn tường"
+                    },
+                    {
+                      "id": "DS.M3.T2.C4.B3.05",
+                      "title": "Dạng 05. Cho đồ thị hàm số. Truy vấn: Nguyên hàm, diện tích, thể tích"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C4.B3.TLN",
+                  "title": "Trả lời ngắn",
+                  "children": [
+                    {
+                      "id": "TLN.M2.T2.C4.B3.02",
+                      "title": "Dạng 02. Tính diện tích hình phẳng giới hạn bởi parabol và đường thẳng"
+                    },
+                    {
+                      "id": "TLN.M3.T2.C4.B3.04",
+                      "title": "Dạng 04. Bài toán thực tế: Tính diện tích cửa vòm hình parabol"
+                    },
+                    {
+                      "id": "TLN.M3.T2.C4.B3.05",
+                      "title": "Dạng 05. Tính thể tích vật thể biết diện tích thiết diện"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "T2.C5",
+          "title": "Chương 5. Phương mặt phẳng, đường thẳng, mặt cầu trong không gian",
+          "children": [
+            {
+              "id": "T2.C5.B1",
+              "title": "Bài 1. Phương trình mặt phẳng",
+              "children": [
+                {
+                  "id": "T2.C5.B1.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M1.T2.C5.B1.01",
+                      "title": "Dạng 01. Cho phương trình mặt phẳng, tìm vectơ pháp tuyến"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B1.02",
+                      "title": "Dạng 02. Cho phương trình mặt phẳng, tìm một điểm thuộc mặt phẳng"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B1.03",
+                      "title": "Dạng 03. Cho phương trình mặt phẳng, tìm một điểm không thuộc mặt phẳng"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B1.04",
+                      "title": "Dạng 04. Xác định mặt phẳng toạ độ"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B1.05",
+                      "title": "Dạng 05. Viết phương trình mặt phẳng đi qua một điểm và có một vectơ pháp tuyến vt{n}"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.06",
+                      "title": "Dạng 06. Viết phương trình mặt phẳng đi qua một điểm và có một vectơ pháp tuyến vt{AB}"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.07",
+                      "title": "Dạng 07. Viết phương trình mặt phẳng đi qua một điểm và vuông góc với trục tọa độ"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.08",
+                      "title": "Dạng 08. Viết phương trình mặt phẳng đi qua một điểm và song song với một mặt phẳng cho trước"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.09",
+                      "title": "Dạng 09. Viết phương trình mặt phẳng trung trực"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.10",
+                      "title": "Dạng 10. Viết phương trình mặt phẳng đi qua một điểm và có cặp vectơ chỉ phương"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.11",
+                      "title": "Dạng 11. Viết phương trình mặt phẳng đi qua ba điểm không thẳng hàng"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.12",
+                      "title": "Dạng 12. Viết phương trình mặt phẳng theo đoạn chắn"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.13",
+                      "title": "Dạng 13. Viết phương trình mặt phẳng đi qua hai điểm và vuông góc với mặt phẳng cho trước"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.14",
+                      "title": "Dạng 14. Viết phương trình mặt phẳng đi qua một điểm và vuông góc với hai mặt phẳng cho trước"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.15",
+                      "title": "Dạng 15. Tính khoảng cách từ một điểm đến một mặt phẳng"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.16",
+                      "title": "Dạng 16. Tính khoảng cách giữa hai mặt phẳng song song"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.17",
+                      "title": "Dạng 17. Tính góc giữa hai mặt phẳng"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.18",
+                      "title": "Dạng 18. Xét vị trí tương đối giữa hai mặt phẳng. KQ: ngẫu nhiên"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.19",
+                      "title": "Dạng 19. Xét vị trí tương đối giữa hai mặt phẳng. KQ: song song"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.20",
+                      "title": "Dạng 20. Xét vị trí tương đối giữa hai mặt phẳng. KQ: trùng nhau"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.21",
+                      "title": "Dạng 21. Xét vị trí tương đối giữa hai mặt phẳng. KQ: vuông góc"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B1.22",
+                      "title": "Dạng 22. Xét vị trí tương đối giữa hai mặt phẳng. KQ: cắt nhau và không vuông góc"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C5.B1.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M2.T2.C5.B1.01",
+                      "title": "Dạng 01. Cho phương trình mặt phẳng: tìm điểm, VTPT, khoảng cách, vị trí tương đối"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C5.B1.TLN",
+                  "title": "Trả lời ngắn",
+                  "children": [
+                    {
+                      "id": "TLN.M2.T2.C5.B1.01",
+                      "title": "Dạng 01. Tính khoảng cách từ một điểm đến hình chiếu của nó lên một mặt phẳng"
+                    },
+                    {
+                      "id": "TLN.M3.T2.C5.B1.02",
+                      "title": "Dạng 02. Tìm các hệ số của mặt phẳng song song và cách mặt phẳng khác một khoảng cho trước"
+                    },
+                    {
+                      "id": "TLN.M2.T2.C5.B1.03",
+                      "title": "Dạng 03. Tính khoảng cách từ một điểm đến một mặt phẳng"
+                    },
+                    {
+                      "id": "TLN.M3.T2.C5.B1.04",
+                      "title": "Dạng 04. Tìm các hệ số của mặt phẳng qua 2 điểm và vuông góc với mặt phẳng khác"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C5.B2",
+              "title": "Bài 2. Phương trình đường thẳng trong không gian",
+              "children": [
+                {
+                  "id": "T2.C5.B2.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M1.T2.C5.B2.01",
+                      "title": "Dạng 01. Cho phương trình đường thẳng, tìm một vectơ chỉ phương"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B2.02",
+                      "title": "Dạng 02. Cho phương trình đường thẳng, tìm một điểm thuộc đường thẳng"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B2.03",
+                      "title": "Dạng 03. Cho phương trình đường thẳng, tìm một điểm không thuộc đường thẳng"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B2.04",
+                      "title": "Dạng 04. Viết phương trình đường thẳng đi qua một điểm và có một vectơ chỉ phương"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B2.05",
+                      "title": "Dạng 05. Viết phương trình đường thẳng đi qua hai điểm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B2.06",
+                      "title": "Dạng 06. Viết phương trình đường thẳng đi qua một điểm và vuông góc với một mặt phẳng"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B2.07",
+                      "title": "Dạng 07. Viết phương trình đường thẳng đi qua một điểm và song song với đường thẳng cho trước"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B2.08",
+                      "title": "Dạng 08. Viết phương trình đường thẳng đi qua điểm A và song song với BC"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B2.09",
+                      "title": "Dạng 01. Cho phương trình đường thẳng, tìm một vectơ chỉ phương"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B2.10",
+                      "title": "Dạng 02. Cho phương trình đường thẳng, tìm một điểm thuộc đường thẳng"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B2.11",
+                      "title": "Dạng 03. Cho phương trình đường thẳng, tìm một điểm không thuộc đường thẳng"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B2.12",
+                      "title": "Dạng 04. Viết phương trình đường thẳng đi qua một điểm và có một vectơ chỉ phương"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B2.13",
+                      "title": "Dạng 05. Viết phương trình đường thẳng đi qua hai điểm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B2.14",
+                      "title": "Dạng 06. Viết phương trình đường thẳng đi qua một điểm và vuông góc với một mặt phẳng"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B2.15",
+                      "title": "Dạng 07. Viết phương trình đường thẳng đi qua một điểm và song song với đường thẳng cho trước"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B2.16",
+                      "title": "Dạng 08. Viết phương trình đường thẳng đi qua điểm A và song song với BC"
+                    },
+                    {
+                      "id": "TN.M3.T2.C5.B2.17",
+                      "title": "Dạng 01. Xét vị trí tương đối của hai đường thẳng. KQ: ngẫu nhiên"
+                    },
+                    {
+                      "id": "TN.M3.T2.C5.B2.18",
+                      "title": "Dạng 02. Xét vị trí tương đối của hai đường thẳng. KQ: song song"
+                    },
+                    {
+                      "id": "TN.M3.T2.C5.B2.19",
+                      "title": "Dạng 03. Xét vị trí tương đối của hai đường thẳng. KQ: trùng nhau"
+                    },
+                    {
+                      "id": "TN.M3.T2.C5.B2.20",
+                      "title": "Dạng 04. Xét vị trí tương đối của hai đường thẳng. KQ: cắt nhau"
+                    },
+                    {
+                      "id": "TN.M3.T2.C5.B2.21",
+                      "title": "Dạng 05. Xét vị trí tương đối của hai đường thẳng. KQ: chéo nhau"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C5.B2.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M2.T2.C5.B2.01",
+                      "title": "Dạng 01. Cho ba điểm. Truy vấn: VTPT, VTCP, PTMP, PTĐT, khoảng cách"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C5.B3",
+              "title": "Bài 3. Góc",
+              "children": [
+                {
+                  "id": "T2.C5.B3.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M3.T2.C5.B3.01",
+                      "title": "Dạng 01. Cho hai đường thẳng. Truy vấn: VTCP, điểm, vị trí tương đối, góc"
+                    },
+                    {
+                      "id": "DS.M3.T2.C5.B3.02",
+                      "title": "Dạng 02. Cho đường thẳng và mặt phẳng. Truy vấn: VTCP, VTPT, điểm, góc"
+                    },
+                    {
+                      "id": "DS.M3.T2.C5.B3.03",
+                      "title": "Dạng 03. Cho hai mặt phẳng. Truy vấn: VTPT, điểm, vị trị tương đối, góc"
+                    },
+                    {
+                      "id": "DS.M3.T2.C5.B3.04",
+                      "title": "Dạng 04. Cho một điểm và một mp. Truy vấn: VTPT, điểm đối xứng qua mp, pt đường thẳng, khoảng cách"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C5.B3.TLN",
+                  "title": "Trả lời ngắn",
+                  "children": [
+                    {
+                      "id": "TLN.M2.T2.C5.B3.01",
+                      "title": "Dạng 01. Góc giữa hai đường thẳng"
+                    },
+                    {
+                      "id": "TLN.M2.T2.C5.B3.02",
+                      "title": "Dạng 02. Góc giữa đường thẳng và mặt phẳng"
+                    },
+                    {
+                      "id": "TLN.M2.T2.C5.B3.03",
+                      "title": "Dạng 03. Góc giữa hai mặt phẳng"
+                    },
+                    {
+                      "id": "TLN.M3.T2.C5.B3.04",
+                      "title": "Dạng 04. Tìm giao điểm của đường thẳng và mặt phẳng"
+                    },
+                    {
+                      "id": "TLN.M3.T2.C5.B3.05",
+                      "title": "Dạng 05. Tìm giao điểm của đường thẳng và mặt phẳng (Thực tế)"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C5.B4",
+              "title": "Bài 4. Phương trình mặt cầu",
+              "children": [
+                {
+                  "id": "T2.C5.B4.TN",
+                  "title": "Trắc nghiệm nhiều lựa chọn",
+                  "children": [
+                    {
+                      "id": "TN.M2.T2.C5.B4.01",
+                      "title": "Dạng 01. Xét điểm nằm trên mặt cầu"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B4.02",
+                      "title": "Dạng 02. Xét điểm nằm ngoài mặt cầu"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B4.03",
+                      "title": "Dạng 03. Xét điểm nằm trong mặt cầu"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B4.04",
+                      "title": "Dạng 04. Tìm tâm mặt cầu dạng thu gọn"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B4.05",
+                      "title": "Dạng 05. Tìm bán kính mặt cầu dạng thu gọn"
+                    },
+                    {
+                      "id": "TN.M1.T2.C5.B4.06",
+                      "title": "Dạng 06. Tìm tâm và bán kính mặt cầu dạng thu gọn"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B4.07",
+                      "title": "Dạng 07. Tìm tâm mặt cầu dạng khai triển"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B4.08",
+                      "title": "Dạng 08. Tìm bán kính mặt cầu dạng khai triển"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B4.09",
+                      "title": "Dạng 09. Tìm tâm và bán kính mặt cầu dạng khai triển"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B4.10",
+                      "title": "Dạng 10. Viết phương trình mặt cầu biết tâm và bán kính"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B4.11",
+                      "title": "Dạng 11. Viết phương trình mặt cầu có tâm I và đi qua một điểm"
+                    },
+                    {
+                      "id": "TN.M2.T2.C5.B4.12",
+                      "title": "Dạng 12. Viết phương trình mặt cầu biết đường kính"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C5.B4.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M3.T2.C5.B4.01",
+                      "title": "Dạng 01. Cho hai điểm và một mặt phẳng. Truy vấn: VTCP, VTPT, pt đường thẳng, pt mặt cầu"
+                    },
+                    {
+                      "id": "DS.M3.T2.C5.B4.02",
+                      "title": "Dạng 02. Cho trạm thu phát sóng di động. Truy vấn: pt mặt cầu, vị trí điểm với mặt cầu"
+                    },
+                    {
+                      "id": "DS.M3.T2.C5.B4.03",
+                      "title": "Dạng 03. Hành trình bay của Drone. Truy vấn: pt đường thẳng, pt mặt cầu, khoảng cách, giao với mặt cầu"
+                    },
+                    {
+                      "id": "DS.M3.T2.C5.B4.04",
+                      "title": "Dạng 04. Tàu vũ trụ. Truy vấn: pt đường thẳng, pt mặt cầu, khoảng cách, giao với mặt cầu"
+                    },
+                    {
+                      "id": "DS.M3.T2.C5.B4.05",
+                      "title": "Dạng 05. Hành trình của Robot. Truy vấn: pt đường thẳng, pt mặt cầu, khoảng cách, giao với mặt cầu"
+                    },
+                    {
+                      "id": "DS.M3.T2.C5.B4.06",
+                      "title": "Dạng 06. Hành trình của tàu ngầm. Truy vấn: pt đường thẳng, pt mặt cầu, khoảng cách, giao với mặt cầu"
+                    },
+                    {
+                      "id": "DS.M3.T2.C5.B4.07",
+                      "title": "Dạng 07. Hành trình của vệ tinh. Truy vấn: pt đường thẳng, pt mặt cầu, khoảng cách, giao với mặt cầu"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C5.B4.TLN",
+                  "title": "Trả lời ngắn",
+                  "children": [
+                    {
+                      "id": "TLN.M3.T2.C5.B4.01",
+                      "title": "Dạng 01. Bài toán thực tế: Tìm vị trí radar phát hiện máy bay"
+                    },
+                    {
+                      "id": "TLN.M3.T2.C5.B4.02",
+                      "title": "Dạng 02. Bài toán thực tế: Tìm thời gian radar kiểm soát UAV"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "T2.C6",
+          "title": "Chương 6. Một số yếu tố xác suất",
+          "children": [
+            {
+              "id": "T2.C6.B1",
+              "title": "Bài 1. Xác suất có điều kiện",
+              "children": [
+                {
+                  "id": "T2.C6.B1.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M3.T2.C6.B1.01",
+                      "title": "Dạng 01. Cửa hàng bán 2 loại bóng đèn với 2 trạng thái: tốt, xấu"
+                    }
+                  ]
+                },
+                {
+                  "id": "T2.C6.B1.TLN",
+                  "title": "Trả lời ngắn",
+                  "children": [
+                    {
+                      "id": "TLN.M2.T2.C6.B1.01",
+                      "title": "Dạng 01. Áp dụng công thức tính xác suất có điều kiện"
+                    },
+                    {
+                      "id": "TLN.M3.T2.C6.B1.02",
+                      "title": "Dạng 02. Khảo sát sở thích, phương tiện của nhóm đối tượng"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T2.C6.B2",
+              "title": "Bài 2. Công thức xác suất toàn phần",
+              "children": [
+                {
+                  "id": "T2.C6.B2.DS",
+                  "title": "Trắc nghiệm đúng, sai",
+                  "children": [
+                    {
+                      "id": "DS.M3.T2.C6.B2.01",
+                      "title": "Dạng 01."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
