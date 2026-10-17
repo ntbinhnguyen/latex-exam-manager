@@ -121,7 +121,7 @@ export const QuestionDetailModal: React.FC<Props> = ({
     );
   const remove = () => {
     const ok = window.confirm(
-      `Xóa câu này khỏi ngân hàng?\n\n${validId ? question.code : "(chưa có ID)"}\n\nCâu hỏi sẽ được ẩn (xóa mềm) và không còn xuất hiện trong ngân hàng.`,
+      `Xóa câu này khỏi ngân hàng?\n\n${validId ? question.code : "(chưa có ID)"}\n\nCâu hỏi sẽ được chuyển vào Thùng rác (xóa mềm), bạn có thể phục hồi hoặc xóa hẳn tại trang Thùng rác.`,
     );
     if (ok) run(() => onDelete!(question.id));
   };

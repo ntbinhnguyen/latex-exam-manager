@@ -2,12 +2,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, LayoutDashboard, Database, FileSpreadsheet } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutDashboard, Database, FileSpreadsheet, Trash2 } from "lucide-react";
 
 const items = [
   { href: "/", label: "Tổng quan", icon: LayoutDashboard },
   { href: "/questions", label: "Quản lý câu hỏi", icon: Database },
   { href: "/exams", label: "Ma trận & Sinh đề", icon: FileSpreadsheet },
+  { href: "/trash", label: "Thùng rác", icon: Trash2 },
 ];
 
 export default function Sidebar() {

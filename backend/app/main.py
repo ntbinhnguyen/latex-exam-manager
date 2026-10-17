@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from sqlalchemy import text
 from app.core.database import engine, Base
 
 # Import các router từ các thư mục api/routes (Giai đoạn 2, 3, 4, 5)
@@ -9,6 +10,13 @@ from app.api.routes import questions, import_latex, exams, export, statistics
 
 # Tạo các bảng trong database nếu chưa tồn tại (trong thực tế nên dùng Alembic)
 Base.metadata.create_all(bind=engine)
+
+# create_all không thêm cột vào bảng đã có -> tự bổ sung cột status (xóa mềm) nếu thiếu
+with engine.begin() as conn:
+    conn.execute(text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS status VARCHAR DEFAULT 'active'"))
+    conn.execute(text("UPDATE questions SET status = 'active' WHERE status IS NULL"))
+    # thời điểm xóa mềm (phục vụ trang Thùng rác)
+    conn.execute(text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ"))
 
 app = FastAPI(title=settings.PROJECT_NAME)
 

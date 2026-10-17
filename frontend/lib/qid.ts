@@ -76,7 +76,7 @@ export function formatParts(parts: QidParts): string {
 /**
  * Kiểm tra xem ID đã đủ điều kiện gán cho câu hỏi chưa (Yêu cầu tới tối thiểu cấp Bài)
  */
-export function isAssignable(parsed: ParsedQid | null): boolean {
+export function isAssignable(parsed: ParsedQid | null): parsed is ParsedQid {
   if (!parsed || parsed.legacy) return false;
   const { type, level, grade, chapter, lesson } = parsed.parts;
   // Phải có đủ 5 thành phần cốt lõi
@@ -301,4 +301,42 @@ export function typeAbbrOfLabel(label: string | null | undefined): TypeAbbr | un
   if (/\btu luan\b|essay/.test(plain)) return "TL";
   if (/\btrac nghiem\b|nhieu lua chon|multiple choice/.test(plain)) return "TN";
   return undefined;
+}
+
+/**
+ * Đọc ID ở dòng đầu khối theo định dạng chuẩn:  \begin{ex}%[TN.M2.T2.C1.B3.05]
+ * Trả về null nếu không có hoặc ID không hợp lệ.
+ */
+export function readQidFromRaw(raw: string | null | undefined): string | null {
+  const m = (raw ?? "").match(/^\s*\\begin\{ex\}[^\n%]*%\s*\[([^\]\s]+)\]/);
+  if (!m) return null;
+  const code = m[1].toUpperCase();
+  const p = parseQid(code);
+  return p && !p.legacy ? code : null;
+}
+
+/**
+ * Ghi ID vào dòng đầu khối:  \begin{ex}%[ID]
+ * - Đã có chú thích trên dòng \begin{ex} -> thay bằng %[ID]; chưa có -> thêm %[ID] ngay sau \begin{ex}.
+ * - ID không hợp lệ (VD mã tạm "Q.1") hoặc nội dung không phải khối \begin{ex} -> giữ nguyên.
+ */
+export function embedQid(raw: string, code: string | null | undefined): string {
+  const p = parseQid(code);
+  if (!code || !p || p.legacy) return raw;
+  const m = raw.match(/^(\s*\\begin\{ex\})/);
+  if (!m) return raw;
+  const head = m[1];
+  const rest = raw.slice(head.length);
+  const nl = rest.match(/\r?\n/);
+  const first = nl ? rest.slice(0, nl.index) : rest;
+  const tail = nl ? rest.slice(nl.index as number) : "";
+  const eol = nl ? nl[0] : "\n";
+  const tag = `%[${code.trim().toUpperCase()}]`;
+  const c = first.match(/(^|[^\\])%/);
+  if (c) {
+    const before = first.slice(0, (c.index ?? 0) + c[1].length);
+    return head + (before.trim() ? before.trimEnd() + " " : "") + tag + tail;
+  }
+  if (first.trim()) return head + tag + eol + first.trimStart() + tail;
+  return head + tag + tail;
 }

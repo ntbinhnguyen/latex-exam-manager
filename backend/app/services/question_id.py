@@ -97,3 +97,28 @@ def retype_qid(qid: str, new_type) -> str:
         bai=parsed["bai"],
         dang=parsed.get("dang")
     )
+
+
+def embed_qid(content: str, qid) -> str:
+    """
+    Ghi ID vào dòng đầu của khối theo định dạng:  \\begin{ex}%[TN.M2.T2.C1.B3.05]
+    - Đã có chú thích trên dòng \\begin{ex} -> thay bằng %[ID]
+    - Chưa có -> thêm %[ID] ngay sau \\begin{ex}
+    ID không hợp lệ / nội dung không phải khối \\begin{ex} -> giữ nguyên.
+    """
+    if not content or not qid or not is_valid_qid(qid):
+        return content
+    m = re.match(r"\s*\\begin\{ex\}", content)
+    if not m:
+        return content
+    head, rest = content[:m.end()], content[m.end():]
+    nl = re.search(r"\r?\n", rest)
+    first, tail, eol = (rest[:nl.start()], rest[nl.start():], nl.group(0)) if nl else (rest, "", "\n")
+    tag = f"%[{qid.strip().upper()}]"
+    c = re.search(r"(?<!\\)%", first)
+    if c:
+        before = first[:c.start()]
+        return head + (before.rstrip() + " " if before.strip() else "") + tag + tail
+    if first.strip():
+        return head + tag + eol + first.lstrip() + tail
+    return head + tag + tail

@@ -11,11 +11,16 @@ import {
 } from "@/components/matrix/types";
 import { stripSolution } from "@/lib/exam-parser";
 import { norm } from "@/lib/tree";
+import { embedQid } from "@/lib/qid";
 import { downloadBlob } from "@/lib/download";
 
-/** Khối LaTeX của một câu hỏi: dùng mã gốc nếu có, không thì bọc đề bài trong \begin{ex}. */
+/**
+ * Khối LaTeX của một câu hỏi: dùng mã gốc nếu có, không thì bọc đề bài trong \begin{ex}.
+ * ID luôn được ghi ở dòng đầu theo định dạng:  \begin{ex}%[TN.M2.T2.C1.B3.05]
+ */
 export function questionTex(q: QuestionItem, solutions: boolean): string {
-  const raw = q.raw?.trim() ? q.raw.trim() : `\\begin{ex}\n${q.content}\n\\end{ex}`;
+  const base = q.raw?.trim() ? q.raw.trim() : `\\begin{ex}\n${q.content}\n\\end{ex}`;
+  const raw = embedQid(base, q.code);
   return solutions ? raw : stripSolution(raw);
 }
 
@@ -27,7 +32,7 @@ export function buildTex(list: QuestionItem[], opts: { name: string; solutions: 
     `% Dán các khối dưới đây vào thân tài liệu của main.tex (gói ex_test).`,
     "",
   ];
-  const body = list.map((q, i) => `% Câu ${i + 1} [${q.code}]${q.level ? ` – Mức ${q.level}` : ""}\n${questionTex(q, opts.solutions)}\n`);
+  const body = list.map((q) => `${questionTex(q, opts.solutions)}\n`);
   return [...head, ...body].join("\n");
 }
 

@@ -37,7 +37,8 @@ class Question(Base):
     
     teacher_notes = Column(Text, nullable=True)
     source_material = Column(String, nullable=True)
-    status = Column(String, default="active") # active, hidden, archived
+    status = Column(String, default="active") # active, hidden, archived (archived = đã xóa mềm)
+    deleted_at = Column(DateTime(timezone=True), nullable=True) # thời điểm xóa mềm
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

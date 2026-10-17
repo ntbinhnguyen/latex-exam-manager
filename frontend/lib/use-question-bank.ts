@@ -13,7 +13,7 @@ import {
   withCounts,
   type FlatRow,
 } from "@/lib/tree";
-import { formatParts, gradeOf, isAssignable, nodeKey, parseQid, type TypeAbbr } from "@/lib/qid";
+import { formatParts, isAssignable, nodeKey, parseQid, readQidFromRaw, type TypeAbbr } from "@/lib/qid";
 import { parseExercise } from "@/lib/exam-parser";
 import { MOCK_QUESTIONS } from "@/components/question-bank/mock-data";
 import type { QuestionItem, QuestionType, TreeNode } from "@/components/question-bank/types";
@@ -70,6 +70,7 @@ export function useQuestionBank() {
   const [questions, setQuestions] = useState<QuestionItem[]>(MOCK_QUESTIONS);
   const [source, setSource] = useState<"mock" | "api">("mock");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // ---- Cây mục lục: tự động (đọc /muc-luc.json) hoặc thủ công (file người dùng nạp) ----
   const [mode, setModeState] = useState<TreeMode>("auto");
@@ -118,13 +119,14 @@ export function useQuestionBank() {
     fetchAllQuestions()
       .then((list) => {
         if (!alive) return;
-        if (list.length > 0) {
-          setQuestions(list);
-          setSource("api");
-        }
+        // Gọi API thành công => dùng dữ liệu thật, kể cả khi ngân hàng đang trống
+        setQuestions(list);
+        setSource("api");
+        setLoadError(null);
       })
-      .catch(() => {
-        /* backend chưa chạy → dùng dữ liệu mẫu */
+      .catch((e) => {
+        // Backend lỗi/không kết nối được -> giữ dữ liệu mẫu nhưng báo rõ lý do
+        if (alive) setLoadError(e instanceof Error ? e.message : String(e));
       })
       .finally(() => alive && setLoading(false));
     return () => {
@@ -198,7 +200,7 @@ export function useQuestionBank() {
         return key ? (nodeMap.get(key)?.title ?? null) : null;
       };
       return {
-        grade_level: String(gradeOf(p.parts)),
+        grade_level: String(10 + Number((p.parts.grade ?? "T0").replace(/\D/g, ""))),
         chapter: title("chapter"),
         lesson: title("lesson"),
         topic: title("form"),
@@ -223,10 +225,14 @@ export function useQuestionBank() {
         body.content_latex = patch.raw;
         kind = parseExercise(patch.raw).kind;
         // loại câu đổi → đoạn loại trong ID phải đổi theo (TN/DS/TLN/TL)
+        // ID sửa trực tiếp ở dòng \begin{ex}%[ID] trong mã LaTeX cũng được nhận
         if (!nextCode) {
-          const p = parseQid(q.code);
+          const rawId = readQidFromRaw(patch.raw);
+          const p = parseQid(rawId ?? q.code);
           if (p && isAssignable(p) && p.parts.type !== ABBR_FROM_KIND[kind]) {
             nextCode = formatParts({ ...p.parts, type: ABBR_FROM_KIND[kind] });
+          } else if (rawId && rawId !== q.code) {
+            nextCode = rawId;
           }
         }
       }
@@ -265,18 +271,28 @@ export function useQuestionBank() {
     [questionMap, source, classificationFor],
   );
 
-  const deleteQuestion = useCallback(
+  /* const deleteQuestion = useCallback(
     async (id: string): Promise<void> => {
       if (source === "api") await api(`/api/questions/${id}`, { method: "DELETE" });
       setQuestions((list) => list.filter((x) => x.id !== id));
     },
     [source],
-  );
+  ); */
+
+  const deleteQuestion = useCallback(
+  async (id: string): Promise<void> => {
+    if (source !== "api") throw new Error("Chưa kết nối backend nên không thể xóa thật.");
+    await api(`/api/questions/${id}`, { method: "DELETE" });
+    setQuestions((list) => list.filter((x) => x.id !== id));
+  },
+  [source],
+);
 
   return {
     questions,
     questionMap,
     source,
+    loadError,
     loading,
     tree,
     nodeMap,

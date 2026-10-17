@@ -1,4 +1,11 @@
-export const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// Tự động kiểm tra môi trường: true nếu đang chạy trên Server Docker, false nếu đang ở trình duyệt Client
+const isServer = typeof window === "undefined";
+
+// Nếu ở Server Docker: Ưu tiên dùng đường dẫn nội bộ API_INTERNAL_URL (http://backend:8000)
+// Nếu ở Trình duyệt Client: Dùng đường dẫn công khai NEXT_PUBLIC_API_URL (http://localhost:8000)
+export const API = isServer
+  ? (process.env.API_INTERNAL_URL ?? "http://localhost:8000")
+  : (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000");
 
 export const TYPES = ["Trắc nghiệm nhiều lựa chọn", "Đúng - Sai", "Trả lời ngắn", "Tự luận"] as const;
 export const LEVELS = ["NB", "TH", "VD", "VDC"] as const;
@@ -11,6 +18,7 @@ export type Question = {
   question_type: string; difficulty_level: string | null;
   grade_level: string | null; chapter: string | null; lesson: string | null; topic: string | null;
   extracted_answer?: string | null; extracted_solution: string | null; teacher_notes: string | null; source_material: string | null;
+  status?: string | null; deleted_at?: string | null; updated_at?: string | null; created_at?: string | null;
 };
 
 export async function api<T = unknown>(path: string, init?: RequestInit): Promise<T> {

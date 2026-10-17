@@ -6,6 +6,7 @@ const titles: Record<string, string> = {
   "/import": "Nhập đề LaTeX",
   "/questions": "Ngân hàng câu hỏi",
   "/exams": "Ma trận & Sinh đề",
+  "/trash": "Thùng rác",
 };
 
 export default function Topbar() {

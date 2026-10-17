@@ -57,6 +57,8 @@ interface QuestionBankDashboardProps {
   treeSource?: string;
   treeWarnings?: string[];
   dataSource?: "mock" | "api";
+  /** Lý do không tải được dữ liệu thật từ backend (nếu có) */
+  dataError?: string | null;
   treeMode?: TreeMode;
   hasManualTree?: boolean;
   onTreeModeChange?: (mode: TreeMode) => boolean;
@@ -79,6 +81,7 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
   treeSource,
   treeWarnings,
   dataSource = "api",
+  dataError = null,
   treeMode,
   hasManualTree,
   onTreeModeChange,
@@ -202,7 +205,7 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
       return next;
     });
     setOpenId(nextId);
-    showToast("Đã xóa câu hỏi khỏi ngân hàng.");
+    showToast("Đã chuyển câu hỏi vào Thùng rác (có thể phục hồi).");
   };
 
   // Hàm xử lý xóa hàng loạt
@@ -216,19 +219,27 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
     }
 
     let successCount = 0;
+    let failCount = 0;
+    let lastError = "";
     // Dùng Promise.all để xóa đồng loạt hoặc vòng lặp for để xóa lần lượt
     for (const id of Array.from(selectedIds)) {
       try {
         await onDeleteQuestion(id);
         successCount++;
       } catch (error) {
+        failCount++;
+        lastError = error instanceof Error ? error.message : String(error);
         console.error("Lỗi khi xóa câu hỏi:", error);
       }
     }
 
     setSelectedIds(new Set());
     setOpenId(null);
-    showToast(`Đã xóa thành công ${successCount} câu hỏi.`);
+    showToast(
+      failCount > 0
+        ? `Đã xóa ${successCount} câu, ${failCount} câu thất bại: ${lastError}`
+        : `Đã xóa thành công ${successCount} câu hỏi.`,
+    );
   };
 
   const handleToggleLevel = (lvl: DifficultyLevel) => {
@@ -296,7 +307,7 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
       {dataSource === "mock" && (
         <div className="mb-1 flex items-center gap-2 rounded border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
           <Info className="h-3.5 w-3.5 shrink-0" />
-          Đang hiển thị dữ liệu mẫu vì chưa kết nối được backend hoặc ngân hàng còn trống.
+          Đang hiển thị dữ liệu mẫu — chưa kết nối được backend{dataError ? `: ${dataError}` : "."} Các thao tác xóa/sửa sẽ không được lưu.
         </div>
       )}
 

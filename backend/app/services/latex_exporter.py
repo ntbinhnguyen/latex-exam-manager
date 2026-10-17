@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.exam import ExamVersion, ExamQuestion
 from app.models.question import Question
+from app.services.question_id import embed_qid
 
 def generate_tex_content(db: Session, version_id, include_solutions: bool = True) -> str:
     """
@@ -70,7 +71,7 @@ def generate_tex_content(db: Session, version_id, include_solutions: bool = True
         q = db.query(Question).filter(Question.id == eq.question_id).first()
         
         # Lấy nguyên vẹn nội dung LaTeX đã lưu trong DB (bao gồm \begin{ex}...\end{ex})
-        content = q.content_latex
+        content = embed_qid(q.content_latex, q.question_code)   # \\begin{ex}%[ID]
         
         # Lưu ý: Thuật toán xáo trộn phương án A,B,C,D (hoán đổi vị trí bên trong lệnh \choice) 
         # sẽ được chèn thêm tại bước này bằng Regex trước khi cộng chuỗi, 

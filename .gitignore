@@ -1,5 +1,74 @@
+# ===== Python / Backend =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+dist/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ===== Biến môi trường / BÍ MẬT =====
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials.json
+
+# ===== Database =====
+*.db
+*.sqlite
+*.sqlite3
+# LƯU Ý: KHÔNG bỏ qua alembic/versions/ — file migration phải được push
+
+# ===== Node / Frontend =====
 node_modules/
 dist/
 build/
-.env
+.vite/
 .next/
+out/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+
+# ===== Docker =====
+# docker-compose.yml NÊN push (là cấu hình chung của dự án)
+# Nhưng file override chứa cấu hình riêng của máy bạn thì không:
+docker-compose.override.yml
+*.pid
+
+# ===== LaTeX (đề thi) =====
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+
+# ===== IDE / OS =====
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
