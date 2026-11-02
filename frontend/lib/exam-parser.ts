@@ -63,6 +63,18 @@ function stripComments(s: string): string {
   return s.replace(/(^|[^\\])%.*$/gm, "$1");
 }
 
+/** Áp dụng fn cho phần văn bản nằm ngoài các khối tabular (giữ nguyên nội dung trong tabular). */
+function outsideTabular(s: string, fn: (x: string) => string): string {
+  let out = "";
+  let last = 0;
+  for (const m of s.matchAll(/\\begin\{tabular\}[\s\S]*?\\end\{tabular\}/g)) {
+    const i = m.index ?? 0;
+    out += fn(s.slice(last, i)) + m[0];
+    last = i + m[0].length;
+  }
+  return out + fn(s.slice(last));
+}
+
 function cleanTex(input: string): { text: string; figure: boolean } {
   let figure = false;
   let t = input;
@@ -89,12 +101,19 @@ function cleanTex(input: string): { text: string; figure: boolean } {
     t = t.slice(0, idx) + g1[0] + (g2 ? "\n\n\\textit{[Hình vẽ – xem mã LaTeX]}" : "") + t.slice(end);
   }
 
-  t = t
-    .replace(/\\begin\{(itemize|enumerate)\}(\[[^\]]*\])?/g, "\n\n")
-    .replace(/\\end\{(itemize|enumerate)\}/g, "\n\n")
-    .replace(/\\item(?![a-zA-Z])\s*/g, "\n\n• ")
-    .replace(/\\(?:vspace|hspace)\*?\{[^}]*\}/g, "")
-    .replace(/\\(?:noindent|centering|medskip|bigskip|smallskip)(?![a-zA-Z])/g, "");
+  // Các thay thế dưới đây KHÔNG áp dụng bên trong \begin{tabular}…\end{tabular}:
+  // ở đó \hspace{..} dùng để giữ độ rộng ô trống cần điền, bảng sẽ do LatexRenderer dựng.
+  t = outsideTabular(t, (x) =>
+    x
+      .replace(/\\begin\{(itemize|enumerate)\}(\[[^\]]*\])?/g, "\n\n")
+      .replace(/\\end\{(itemize|enumerate)\}/g, "\n\n")
+      // \item[a)] -> **a)** ; \item thường -> •
+      .replace(/\\item(?![a-zA-Z])\s*(?:\[([^\]]*)\])?\s*/g, (_m, label?: string) =>
+        label && label.trim() ? `\n\n**${label.trim()}** ` : "\n\n• "
+      )
+      .replace(/\\(?:vspace|hspace)\*?\{[^}]*\}/g, "")
+      .replace(/\\(?:noindent|centering|medskip|bigskip|smallskip)(?![a-zA-Z])/g, "")
+  );
 
   return { text: t.trim(), figure };
 }

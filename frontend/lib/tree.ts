@@ -126,16 +126,27 @@ export function parseTreeJson(data: unknown): TreeParseResult {
   return rowsFromObjects(arr as Record<string, unknown>[]);
 }
 
-export async function parseTreeXlsx(file: File): Promise<TreeParseResult> {
+/** Đọc cây từ nội dung file Excel (.xlsx/.xls) đã có sẵn dạng ArrayBuffer – dùng cho cả nạp thủ công lẫn tự động. */
+export async function parseTreeXlsxBuffer(buf: ArrayBuffer): Promise<TreeParseResult> {
   const XLSX = await import("xlsx");
-  const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
-  const sheetName =
-    wb.SheetNames.find((n) => ["muc_luc", "mucluc", "tree", "cay"].includes(norm(n))) ?? wb.SheetNames[0];
-  const ws = wb.Sheets[sheetName];
-  if (!ws) throw new Error("File Excel không có sheet nào.");
-  const items = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
-  if (items.length === 0) throw new Error("Sheet đầu tiên không có dữ liệu.");
-  return rowsFromObjects(items);
+  const wb = XLSX.read(buf, { type: "array" });
+  if (wb.SheetNames.length === 0) throw new Error("File Excel không có sheet nào.");
+
+  // Ưu tiên sheet tên muc_luc / tree / cay; nếu không có thì thử lần lượt từng sheet cho tới khi gặp sheet có dữ liệu
+  const preferred = wb.SheetNames.find((n) => ["muc_luc", "mucluc", "tree", "cay"].includes(norm(n)));
+  const order = preferred ? [preferred, ...wb.SheetNames.filter((n) => n !== preferred)] : wb.SheetNames;
+
+  for (const name of order) {
+    const ws = wb.Sheets[name];
+    if (!ws) continue;
+    const items = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "", blankrows: false });
+    if (items.length > 0) return rowsFromObjects(items);
+  }
+  throw new Error("File Excel không có dữ liệu (cần các cột: id, title).");
+}
+
+export async function parseTreeXlsx(file: File): Promise<TreeParseResult> {
+  return parseTreeXlsxBuffer(await file.arrayBuffer());
 }
 
 export async function parseTreeFile(file: File): Promise<TreeParseResult> {

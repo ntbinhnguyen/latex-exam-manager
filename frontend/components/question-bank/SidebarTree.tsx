@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Folder,
   Layers,
@@ -30,7 +31,7 @@ interface SidebarTreeProps {
   readOnly?: boolean;
   treeSource?: string;
   treeWarnings?: string[];
-  /** Chế độ nạp cây: "auto" = đọc public/muc-luc.json, "manual" = file người dùng tự nạp */
+  /** Chế độ nạp cây: "auto" = đọc public/muc-luc.xlsx hoặc muc-luc.json, "manual" = file người dùng tự nạp */
   treeMode?: TreeMode;
   hasManualTree?: boolean;
   /** Trả về false nếu chưa thể chuyển (chưa có file thủ công) */
@@ -76,6 +77,31 @@ export const SidebarTree: React.FC<SidebarTreeProps> = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const [showWarn, setShowWarn] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+
+  const toggleMenu = () => {
+    if (!menuOpen) {
+      const r = menuBtnRef.current?.getBoundingClientRect();
+      if (r) setMenuPos({ top: r.bottom + 4, right: Math.max(8, window.innerWidth - r.right) });
+    }
+    setMenuOpen((v) => !v);
+  };
+
+  // Menu dùng position: fixed nên đóng lại khi cuộn / đổi kích thước cửa sổ để khỏi lệch vị trí
+  useEffect(() => {
+    if (!menuOpen) return;
+    const close = () => setMenuOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false);
+    window.addEventListener("resize", close);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("resize", close);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
   const searching = treeSearch.trim().length > 0;
   const visibleTree = useMemo(() => filterNodes(treeData, treeSearch), [treeData, treeSearch]);
@@ -107,7 +133,7 @@ export const SidebarTree: React.FC<SidebarTreeProps> = ({
       fileRef.current?.click();
       return;
     }
-    onNotify?.(mode === "auto" ? "Đã chuyển sang cây TỰ ĐỘNG (public/muc-luc.json)." : "Đã chuyển sang cây THỦ CÔNG.");
+    onNotify?.(mode === "auto" ? "Đã chuyển sang cây TỰ ĐỘNG (public/muc-luc.xlsx hoặc muc-luc.json)." : "Đã chuyển sang cây THỦ CÔNG.");
   };
 
   const reload = async () => {
@@ -200,17 +226,23 @@ export const SidebarTree: React.FC<SidebarTreeProps> = ({
           <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
             <button
               type="button"
-              onClick={() => setMenuOpen((v) => !v)}
+              ref={menuBtnRef}
+              onClick={toggleMenu}
               title="Nạp / xuất cây mục lục"
               aria-label="Menu cây mục lục"
               className="rounded p-1 text-white/80 transition hover:bg-white/10 hover:text-white"
             >
               <MoreVertical className="h-4 w-4" />
             </button>
-            {menuOpen && (
+            {menuOpen &&
+              typeof document !== "undefined" &&
+              createPortal(
               <>
-                <div className="fixed inset-0 z-20" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 z-30 mt-1 w-64 rounded-md border border-gray-200 bg-white py-1 text-xs font-normal text-gray-700 shadow-lg">
+                <div className="fixed inset-0 z-[54]" onClick={() => setMenuOpen(false)} />
+                <div
+                  className="fixed z-[55] w-64 max-w-[calc(100vw-16px)] rounded-md border border-gray-200 bg-white py-1 text-xs font-normal text-gray-700 shadow-lg"
+                  style={{ top: menuPos.top, right: menuPos.right }}
+                >
                   <button
                     type="button"
                     className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-gray-100"
@@ -219,7 +251,7 @@ export const SidebarTree: React.FC<SidebarTreeProps> = ({
                       reload();
                     }}
                   >
-                    <RefreshCw className="h-3.5 w-3.5" /> Tải lại cây tự động (public/muc-luc.json)
+                    <RefreshCw className="h-3.5 w-3.5" /> Tải lại cây tự động (public/muc-luc.xlsx / .json)
                   </button>
                   <button
                     type="button"
@@ -264,7 +296,8 @@ export const SidebarTree: React.FC<SidebarTreeProps> = ({
                     <RotateCcw className="h-3.5 w-3.5" /> Bỏ file thủ công, dùng cây tự động
                   </button>
                 </div>
-              </>
+              </>,
+              document.body
             )}
             <input ref={fileRef} type="file" accept=".json,.xlsx,.xls" className="hidden" onChange={handleFile} />
           </div>
@@ -288,7 +321,7 @@ export const SidebarTree: React.FC<SidebarTreeProps> = ({
               <button
                 type="button"
                 onClick={() => switchMode("auto")}
-                title="Tự động đọc file public/muc-luc.json mỗi lần mở trang"
+                title="Tự động đọc file public/muc-luc.xlsx (hoặc muc-luc.json) mỗi lần mở trang"
                 className={`flex flex-1 items-center justify-center gap-1 px-2 py-1 transition ${
                   treeMode === "auto" ? "bg-[#4A0E17] text-white" : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}

@@ -9,6 +9,7 @@ import {
   flattenTree,
   parseTreeFile,
   parseTreeJson,
+  parseTreeXlsxBuffer,
   rowsFromObjects,
   withCounts,
   type FlatRow,
@@ -21,8 +22,15 @@ import sampleTree from "@/data/muc-luc.sample.json";
 
 const TREE_KEY = "qb.tree.v2";
 const MODE_KEY = "qb.treeMode.v2";
-/** File mục lục tự động nạp: frontend/public/muc-luc.json */
-export const AUTO_TREE_URL = "/muc-luc.json";
+/**
+ * File mục lục tự động nạp từ frontend/public/, theo thứ tự ưu tiên:
+ * muc-luc.xlsx (Excel) -> muc-luc.json. File nào không có hoặc không hợp lệ thì thử file kế tiếp.
+ */
+export const AUTO_TREE_SOURCES = [
+  { url: "/muc-luc.xlsx", label: "public/muc-luc.xlsx", kind: "xlsx" },
+  { url: "/muc-luc.json", label: "public/muc-luc.json", kind: "json" },
+] as const;
+export const AUTO_TREE_LABEL = "public/muc-luc.xlsx hoặc muc-luc.json";
 const PAGE = 1000;
 const MAX_QUESTIONS = 30000;
 
@@ -72,7 +80,7 @@ export function useQuestionBank() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // ---- Cây mục lục: tự động (đọc /muc-luc.json) hoặc thủ công (file người dùng nạp) ----
+  // ---- Cây mục lục: tự động (đọc /muc-luc.xlsx hoặc /muc-luc.json) hoặc thủ công (file người dùng nạp) ----
   const [mode, setModeState] = useState<TreeMode>("auto");
   const [autoTree, setAutoTree] = useState<StoredTree & { warnings: string[] }>({
     rows: DEFAULT_ROWS,
@@ -82,21 +90,33 @@ export function useQuestionBank() {
   const [manualTree, setManualTree] = useState<(StoredTree & { warnings: string[] }) | null>(null);
 
   const loadAutoTree = useCallback(async (): Promise<{ count: number; source: string }> => {
-    try {
-      const res = await fetch(AUTO_TREE_URL, { cache: "no-store" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const { rows, warnings } = parseTreeJson(await res.json());
-      if (rows.length === 0) throw new Error("File không có mục nào hợp lệ.");
-      setAutoTree({ rows, source: "public/muc-luc.json", warnings });
-      return { count: rows.length, source: "public/muc-luc.json" };
-    } catch {
-      setAutoTree({
-        rows: DEFAULT_ROWS,
-        source: "Mẫu tích hợp sẵn (không đọc được public/muc-luc.json)",
-        warnings: [],
-      });
-      return { count: DEFAULT_ROWS.length, source: "mẫu tích hợp sẵn" };
+    for (const src of AUTO_TREE_SOURCES) {
+      try {
+        const res = await fetch(src.url, { cache: "no-store" });
+        if (!res.ok) continue; // không có file này -> thử file kế tiếp
+        let parsed;
+        if (src.kind === "xlsx") {
+          const buf = await res.arrayBuffer();
+          const head = new Uint8Array(buf.slice(0, 2));
+          // .xlsx thực chất là file zip (bắt đầu bằng "PK"); tránh trường hợp server trả về trang HTML thay cho file
+          if (head[0] !== 0x50 || head[1] !== 0x4b) continue;
+          parsed = await parseTreeXlsxBuffer(buf);
+        } else {
+          parsed = parseTreeJson(await res.json());
+        }
+        if (parsed.rows.length === 0) continue;
+        setAutoTree({ rows: parsed.rows, source: src.label, warnings: parsed.warnings });
+        return { count: parsed.rows.length, source: src.label };
+      } catch {
+        // file lỗi định dạng -> thử file kế tiếp
+      }
     }
+    setAutoTree({
+      rows: DEFAULT_ROWS,
+      source: `Mẫu tích hợp sẵn (không đọc được ${AUTO_TREE_LABEL})`,
+      warnings: [],
+    });
+    return { count: DEFAULT_ROWS.length, source: "mẫu tích hợp sẵn" };
   }, []);
 
   useEffect(() => {
@@ -172,7 +192,7 @@ export function useQuestionBank() {
     return { count: rows.length, warnings };
   }, []);
 
-  /** Đọc lại cây tự động (sau khi sửa public/muc-luc.json) và chuyển về chế độ tự động. */
+  /** Đọc lại cây tự động (sau khi sửa public/muc-luc.xlsx hoặc muc-luc.json) và chuyển về chế độ tự động. */
   const reloadAutoTree = useCallback(async () => {
     const r = await loadAutoTree();
     setModeState("auto");
