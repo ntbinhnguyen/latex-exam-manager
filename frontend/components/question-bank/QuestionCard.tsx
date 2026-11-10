@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
-import { Check } from "lucide-react";
-import { QuestionItem } from "./types";
+import { Check, CheckCheck } from "lucide-react";
+import { DupMatch, QuestionItem } from "./types";
 import { LatexRenderer } from "./LatexRenderer";
 import { LevelChips } from "./LevelChips";
 import { hasValidId } from "@/lib/tree";
+import { DUP_BADGE_CLASS, DUP_LABEL, dupShortLabel } from "@/lib/duplicates";
 
 interface QuestionCardProps {
   question: QuestionItem;
@@ -13,6 +14,11 @@ interface QuestionCardProps {
   onToggleSelect: (id: string) => void;
   onOpen: (id: string) => void;
   onAddQuestion?: (id: string) => void;
+  /** Chế độ kiểm duyệt: thay nút THÊM (vào đề) bằng nút DUYỆT (đưa câu vào ngân hàng) */
+  reviewMode?: boolean;
+  onApprove?: (id: string) => void;
+  /** Kết quả kiểm tra trùng nghiêm trọng nhất của câu này (chỉ có ở mục chờ kiểm duyệt) */
+  duplicate?: DupMatch;
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -21,6 +27,9 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   onToggleSelect,
   onOpen,
   onAddQuestion,
+  reviewMode = false,
+  onApprove,
+  duplicate,
 }) => {
   const stop = (fn: () => void) => (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation();
@@ -55,14 +64,25 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
           {/* Mức độ: chỉ để xem */}
           <LevelChips level={question.level} />
 
-          <button
-            type="button"
-            onClick={stop(() => onAddQuestion?.(question.id))}
-            title="Thêm câu hỏi này vào đề thi"
-            className="flex items-center gap-0.5 rounded border border-amber-400/50 bg-[#4A0E17] px-1 py-0.5 text-[9.5px] font-semibold text-white/90 transition hover:bg-amber-400/20 sm:px-1.5 sm:text-[10px]"
-          >
-            THÊM
-          </button>
+          {reviewMode ? (
+            <button
+              type="button"
+              onClick={stop(() => onApprove?.(question.id))}
+              title="Duyệt câu này: đưa vào ngân hàng câu hỏi"
+              className="flex items-center gap-0.5 rounded border border-emerald-300/60 bg-emerald-600 px-1.5 py-0.5 text-[9.5px] font-semibold text-white transition hover:bg-emerald-500 sm:text-[10px]"
+            >
+              <CheckCheck className="h-3 w-3" /> DUYỆT
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={stop(() => onAddQuestion?.(question.id))}
+              title="Thêm câu hỏi này vào đề thi"
+              className="flex items-center gap-0.5 rounded border border-amber-400/50 bg-[#4A0E17] px-1 py-0.5 text-[9.5px] font-semibold text-white/90 transition hover:bg-amber-400/20 sm:px-1.5 sm:text-[10px]"
+            >
+              THÊM
+            </button>
+          )}
 
           <button
             type="button"
@@ -80,13 +100,22 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       </div>
 
       <div className="flex flex-1 flex-col p-3 sm:p-3.5">
-        {hasValidId(question) ? (
-          <div className="mb-2 text-[11px] font-bold tracking-wide text-slate-700 sm:text-xs">{question.code}</div>
-        ) : (
-          <div className="mb-2">
+        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+          {hasValidId(question) ? (
+            <span className="text-[11px] font-bold tracking-wide text-slate-700 sm:text-xs">{question.code}</span>
+          ) : (
             <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10.5px] font-bold text-amber-800">Chưa gắn ID</span>
-          </div>
-        )}
+          )}
+          {duplicate && (
+            <span
+              title={`${DUP_LABEL[duplicate.kind]} – giống ${Math.round(duplicate.similarity * 100)}% với câu ${duplicate.other_code ?? "chưa có ID"}`}
+              className={`rounded px-1.5 py-0.5 text-[10.5px] font-bold ${DUP_BADGE_CLASS[duplicate.kind]}`}
+            >
+              {duplicate.kind === "diff_data" ? "" : "⚠ "}
+              {dupShortLabel(duplicate)}
+            </span>
+          )}
+        </div>
         <div className="min-h-[52px]">
           <LatexRenderer content={question.content} className="line-clamp-4" />
         </div>

@@ -23,6 +23,8 @@ export interface TreeParseResult {
 }
 
 export const UNASSIGNED_ID = "unassigned";
+/** Mục "Câu hỏi chờ kiểm duyệt": chứa câu mới nhập từ file .tex, chưa thuộc ngân hàng. */
+export const PENDING_ID = "pending";
 
 export const norm = (s: string): string =>
   s
@@ -234,8 +236,12 @@ export function buildTree(rows: FlatRow[], extraCodes: Iterable<string> = []): T
   return sortKids(children.get("") ?? []).map((d) => make(d, 1));
 }
 
-/** Thêm nút gốc "Tất cả" (+ nút "Chưa gắn ID" nếu có) và tính số câu cho từng mục. */
-export function withCounts(roots: TreeNode[], questions: QuestionItem[]): TreeNode[] {
+/**
+ * Thêm nút gốc "Tất cả", mục "Câu hỏi chờ kiểm duyệt" (luôn hiện, nằm phía trên mục "Chưa gắn ID")
+ * và mục "Chưa gắn ID" (nếu có), rồi tính số câu cho từng mục.
+ * `pendingCount` là số câu đang chờ duyệt – KHÔNG tính vào số câu của "Tất cả" vì chưa thuộc ngân hàng.
+ */
+export function withCounts(roots: TreeNode[], questions: QuestionItem[], pendingCount = 0): TreeNode[] {
   const counts = new Map<string, number>();
   let unassigned = 0;
   for (const q of questions) {
@@ -250,6 +256,15 @@ export function withCounts(roots: TreeNode[], questions: QuestionItem[]): TreeNo
   });
   const children = roots.map(apply);
   
+  children.push({
+    id: PENDING_ID,
+    title: "Câu hỏi chờ kiểm duyệt",
+    count: pendingCount,
+    icon: "folder",
+    level: 1,
+    kind: "pending",
+  });
+
   if (unassigned > 0) {
     children.push({
       id: UNASSIGNED_ID,
@@ -270,6 +285,11 @@ export function withCounts(roots: TreeNode[], questions: QuestionItem[]): TreeNo
       children,
     } as TreeNode,
   ];
+}
+
+/** Bỏ mục "Câu hỏi chờ kiểm duyệt" khỏi cây (dùng ở nơi chỉ chọn dạng bài từ ngân hàng, vd. hộp chọn dạng bài của ma trận). */
+export function withoutPending(roots: TreeNode[]): TreeNode[] {
+  return roots.map((n) => ({ ...n, children: n.children?.filter((c) => c.kind !== "pending") }));
 }
 
 export function flattenTree(nodes: TreeNode[]): TreeNode[] {
@@ -303,7 +323,7 @@ export interface ExportRow {
 /** Danh sách phẳng để xuất file mục lục (cột "cap" chỉ để dễ đọc). */
 export function treeToFlatRows(roots: TreeNode[]): ExportRow[] {
   return flattenTree(roots)
-    .filter((n) => n.kind && n.kind !== "unassigned" && n.id !== "all")
+    .filter((n) => n.kind && n.kind !== "unassigned" && n.kind !== "pending" && n.id !== "all")
     .map((n) => ({ id: n.id, title: n.title, cap: KIND_LABEL[n.kind as NodeKind] || "" }));
 }
 

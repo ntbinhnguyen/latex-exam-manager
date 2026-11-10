@@ -1,12 +1,19 @@
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Form
+from pydantic import BaseModel
+from uuid import UUID
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.services.latex_parser import parse_latex_file
 from app.models.question import Question, QuestionType
 from app.services.question_id import build_qid, embed_qid
 from app.services.latex_parser import TYPE_ABBR
+from app.services.duplicate_checker import find_duplicates, summarize
 from app.models.question import DifficultyLevel
+from app.models.import_log import ImportLog
+from typing import List, Optional
+import os
 import json
+from datetime import datetime, timedelta, timezone
 
 LEVEL_TEXT = {"M1": "NB", "M2": "TH", "M3": "VD", "M4": "VDC"}
 
@@ -82,6 +89,8 @@ async def upload_tex_file(
         qid_level = "M1"
 
     saved_count = 0
+    # Mốc thời gian gốc: mỗi câu lệch nhau 1 micro-giây để giữ ĐÚNG thứ tự câu trong file khi hiển thị
+    base_time = datetime.now(timezone.utc)
     items = []         # thống kê từng câu: STT | Loại câu hỏi | ID | Đáp án
     from_file = 0      # câu đã có sẵn ID trong file .tex
     auto_assigned = 0  # câu được gắn ID theo Lớp/Chương/Bài chọn ở form
@@ -103,14 +112,35 @@ async def upload_tex_file(
             "question_code": q_data.get("question_code"),
             "answer": q_data.get("extracted_answer"),
         })
+        # Câu mới nhập KHÔNG vào ngân hàng ngay: để ở trạng thái "pending" (chờ kiểm duyệt)
+        q_data["status"] = "pending"
+        q_data["created_at"] = base_time + timedelta(microseconds=saved_count)
         new_question = Question(**q_data)
         db.add(new_question)
         saved_count += 1
 
     db.commit()
-    
+
+    # Ghi nhật ký nhập file (không làm hỏng việc nhập nếu ghi nhật ký gặp lỗi)
+    try:
+        db.add(ImportLog(filename=os.path.basename(file.filename or "") or "(không tên)", question_count=saved_count))
+        db.commit()
+    except Exception:  # noqa: BLE001
+        db.rollback()
+
+    # Kiểm tra trùng nội dung ngay khi nhập (không làm hỏng việc nhập nếu bộ kiểm tra gặp lỗi)
+    duplicate_summary = None
+    try:
+        new_pending = db.query(Question).filter(Question.status == "pending").all()
+        pool = db.query(Question).filter(Question.status != "archived").all()
+        duplicate_summary = summarize(find_duplicates(new_pending, pool))
+    except Exception:  # noqa: BLE001
+        duplicate_summary = None
+
     return {
-        "message": "Nhập dữ liệu thành công",
+        "message": "Đã đưa câu hỏi vào mục chờ kiểm duyệt",
+        "duplicate_summary": duplicate_summary,
+        "status": "pending",
         "total_extracted": parse_result["total_found"],
         "total_saved": saved_count,
         "with_id_from_file": from_file,
@@ -118,3 +148,45 @@ async def upload_tex_file(
         "without_id": saved_count - from_file - auto_assigned,
         "items": items
     }
+
+
+@router.get("/import-logs")
+def list_import_logs(q: Optional[str] = None, skip: int = 0, limit: int = 1000,
+                     db: Session = Depends(get_db)):
+    """Nhật ký các file .tex đã nhập, mới nhất trước: ngày nhập, tên file, số câu."""
+    query = db.query(ImportLog)
+    if q:
+        query = query.filter(ImportLog.filename.ilike(f"%{q}%"))
+    total = query.count()
+    rows = (query.order_by(ImportLog.imported_at.desc(), ImportLog.id.desc())
+            .offset(max(0, skip)).limit(max(1, min(limit, 5000))).all())
+    return {
+        "total": total,
+        "data": [
+            {
+                "id": str(r.id),
+                "filename": r.filename,
+                "question_count": r.question_count,
+                "imported_at": r.imported_at.isoformat() if r.imported_at else None,
+            }
+            for r in rows
+        ],
+    }
+
+
+class ImportLogDelete(BaseModel):
+    ids: List[UUID] = []
+    all: bool = False  # true = xóa toàn bộ nhật ký (bỏ qua ids)
+
+
+@router.post("/import-logs/delete")
+def delete_import_logs(body: ImportLogDelete, db: Session = Depends(get_db)):
+    """Xóa dòng nhật ký nhập file (theo id, hoặc toàn bộ). Chỉ xóa nhật ký, KHÔNG ảnh hưởng câu hỏi đã nhập."""
+    query = db.query(ImportLog)
+    if not body.all:
+        if not body.ids:
+            return {"deleted": 0}
+        query = query.filter(ImportLog.id.in_(body.ids))
+    deleted = query.delete(synchronize_session=False)
+    db.commit()
+    return {"deleted": deleted}

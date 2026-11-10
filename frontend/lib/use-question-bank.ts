@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LEVELS, api, put, type Question } from "@/lib/api";
+import { LEVELS, api, post, put, type Question } from "@/lib/api";
 import { mapBackendQuestion } from "@/lib/question-mapper";
 import { loadJson, removeKey, saveJson } from "@/lib/storage";
 import {
@@ -17,7 +17,13 @@ import {
 import { formatParts, isAssignable, nodeKey, parseQid, readQidFromRaw, type TypeAbbr } from "@/lib/qid";
 import { parseExercise } from "@/lib/exam-parser";
 import { MOCK_QUESTIONS } from "@/components/question-bank/mock-data";
-import type { QuestionItem, QuestionType, TreeNode } from "@/components/question-bank/types";
+import type { DupMap, DupMatch, QuestionItem, QuestionType, TreeNode } from "@/components/question-bank/types";
+
+/** Kết quả duyệt: `skipped` = các câu bị bỏ qua vì nghi trùng (xem lại rồi quyết định). */
+export interface ApproveResult {
+  approved: number;
+  skipped: { id: string; matches: DupMatch[] }[];
+}
 import sampleTree from "@/data/muc-luc.sample.json";
 
 const TREE_KEY = "qb.tree.v2";
@@ -57,6 +63,27 @@ async function fetchAllQuestions(): Promise<QuestionItem[]> {
   return out;
 }
 
+/** Câu hỏi chờ kiểm duyệt (mới nhập từ file .tex, chưa vào ngân hàng). */
+async function fetchAllPending(): Promise<QuestionItem[]> {
+  const out: QuestionItem[] = [];
+  let skip = 0;
+  let total = Infinity;
+  while (skip < total && skip < MAX_QUESTIONS) {
+    const res = await api<{ total: number; data: Question[] }>(`/api/questions/pending?skip=${skip}&limit=${PAGE}`);
+    total = res.total;
+    if (!res.data.length) break;
+    res.data.forEach((q, i) => out.push(mapBackendQuestion(q, skip + i)));
+    skip += res.data.length;
+  }
+  return out;
+}
+
+/** Kiểm tra trùng nội dung của các câu đang chờ duyệt: { id_câu: [các câu nghi trùng] } */
+async function fetchDuplicates(): Promise<DupMap> {
+  const res = await api<{ duplicates: DupMap }>("/api/questions/pending/duplicates");
+  return res.duplicates ?? {};
+}
+
 const TYPE_FROM_KIND = {
   choice: "Trắc nghiệm",
   tf: "Đúng/Sai",
@@ -76,6 +103,8 @@ export interface QuestionPatch {
 
 export function useQuestionBank() {
   const [questions, setQuestions] = useState<QuestionItem[]>(MOCK_QUESTIONS);
+  const [pending, setPending] = useState<QuestionItem[]>([]);
+  const [duplicates, setDuplicates] = useState<DupMap>({});
   const [source, setSource] = useState<"mock" | "api">("mock");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -136,23 +165,102 @@ export function useQuestionBank() {
 
   useEffect(() => {
     let alive = true;
-    fetchAllQuestions()
-      .then((list) => {
+    (async () => {
+      try {
+        const list = await fetchAllQuestions();
         if (!alive) return;
         // Gọi API thành công => dùng dữ liệu thật, kể cả khi ngân hàng đang trống
         setQuestions(list);
         setSource("api");
         setLoadError(null);
-      })
-      .catch((e) => {
+        try {
+          const waiting = await fetchAllPending();
+          if (alive) setPending(waiting);
+          const dups = waiting.length > 0 ? await fetchDuplicates().catch(() => ({}) as DupMap) : {};
+          if (alive) setDuplicates(dups);
+        } catch {
+          // backend cũ chưa có API chờ kiểm duyệt -> coi như không có câu nào chờ
+        }
+      } catch (e) {
         // Backend lỗi/không kết nối được -> giữ dữ liệu mẫu nhưng báo rõ lý do
         if (alive) setLoadError(e instanceof Error ? e.message : String(e));
-      })
-      .finally(() => alive && setLoading(false));
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
     return () => {
       alive = false;
     };
   }, []);
+
+  /** Tải lại cả ngân hàng lẫn danh sách chờ kiểm duyệt (sau khi nhập đề hoặc duyệt câu). */
+  const reloadQuestions = useCallback(async () => {
+    const [list, waiting, dups] = await Promise.all([
+      fetchAllQuestions(),
+      fetchAllPending().catch(() => [] as QuestionItem[]),
+      fetchDuplicates().catch(() => ({}) as DupMap),
+    ]);
+    setQuestions(list);
+    setPending(waiting);
+    setDuplicates(waiting.length > 0 ? dups : {});
+    setSource("api");
+    setLoadError(null);
+    return { bank: list.length, pending: waiting.length };
+  }, []);
+
+  /** Chỉ tính lại kết quả kiểm tra trùng (sau khi sửa nội dung / đổi ID / từ chối câu chờ duyệt). */
+  const refreshDuplicates = useCallback(async () => {
+    try {
+      setDuplicates(await fetchDuplicates());
+    } catch {
+      /* giữ kết quả cũ nếu lỗi mạng */
+    }
+  }, []);
+
+  /**
+   * Duyệt các câu: chuyển từ "chờ kiểm duyệt" vào ngân hàng chính thức.
+   * Backend kiểm tra trùng LẠI lúc duyệt: câu nghi trùng bị bỏ qua (trả về trong `skipped`) trừ khi force = true.
+   */
+  const approvePending = useCallback(
+    async (ids: string[], force = false): Promise<ApproveResult> => {
+      if (ids.length === 0) return { approved: 0, skipped: [] };
+      const res = await post<{ approved: number; skipped?: ApproveResult["skipped"] }>("/api/questions/pending/approve", {
+        ids,
+        force,
+      });
+      await reloadQuestions();
+      return { approved: res.approved, skipped: res.skipped ?? [] };
+    },
+    [reloadQuestions],
+  );
+
+  /** "Giữ cả hai": xác nhận câu chờ duyệt này KHÔNG trùng các câu đang bị cảnh báo. */
+  const dismissDuplicates = useCallback(
+    async (id: string, otherIds: string[] = []) => {
+      await post(`/api/questions/pending/${id}/dismiss-duplicates`, { other_ids: otherIds });
+      await refreshDuplicates();
+    },
+    [refreshDuplicates],
+  );
+
+  /** Thay thế câu cũ trong ngân hàng bằng câu mới (câu cũ vào Thùng rác, vẫn phục hồi được). */
+  const replaceWithPending = useCallback(
+    async (id: string, oldId: string) => {
+      await post(`/api/questions/pending/${id}/replace`, { old_id: oldId });
+      await reloadQuestions();
+    },
+    [reloadQuestions],
+  );
+
+  /** Từ chối các câu chờ duyệt: chuyển vào Thùng rác (vẫn phục hồi được). */
+  const rejectPending = useCallback(async (ids: string[]): Promise<number> => {
+    if (ids.length === 0) return 0;
+    const res = await post<{ rejected: number }>("/api/questions/pending/reject", { ids });
+    const gone = new Set(ids);
+    setPending((list) => list.filter((q) => !gone.has(q.id)));
+    void refreshDuplicates();
+    return res.rejected;
+  }, [refreshDuplicates]);
 
   const activeTree = mode === "manual" && manualTree ? manualTree : autoTree;
 
@@ -164,11 +272,13 @@ export function useQuestionBank() {
           questions.map((q) => q.code),
         ),
         questions,
+        pending.length,
       ),
-    [activeTree, questions],
+    [activeTree, questions, pending.length],
   );
   const nodeMap = useMemo(() => new Map(flattenTree(tree).map((n) => [n.id, n])), [tree]);
-  const questionMap = useMemo(() => new Map(questions.map((q) => [q.id, q])), [questions]);
+  // gồm cả câu chờ kiểm duyệt để xem / sửa / gắn ID ngay trong mục kiểm duyệt
+  const questionMap = useMemo(() => new Map([...questions, ...pending].map((q) => [q.id, q])), [questions, pending]);
 
   /** Chuyển chế độ. Sang "thủ công" mà chưa có file nào đã nạp thì trả về false (giao diện sẽ mở hộp chọn file). */
   const setTreeMode = useCallback(
@@ -286,9 +396,12 @@ export function useQuestionBank() {
         if (nextCode) updated.code = nextCode;
       }
       setQuestions((list) => list.map((x) => (x.id === id ? updated : x)));
+      setPending((list) => list.map((x) => (x.id === id ? updated : x)));
+      // đổi nội dung / ID có thể làm thay đổi kết quả kiểm tra trùng
+      if (pending.length > 0) void refreshDuplicates();
       return updated;
     },
-    [questionMap, source, classificationFor],
+    [questionMap, source, classificationFor, pending.length, refreshDuplicates],
   );
 
   /* const deleteQuestion = useCallback(
@@ -304,12 +417,16 @@ export function useQuestionBank() {
     if (source !== "api") throw new Error("Chưa kết nối backend nên không thể xóa thật.");
     await api(`/api/questions/${id}`, { method: "DELETE" });
     setQuestions((list) => list.filter((x) => x.id !== id));
+    setPending((list) => list.filter((x) => x.id !== id));
+    if (pending.length > 0) void refreshDuplicates();
   },
-  [source],
+  [source, pending.length, refreshDuplicates],
 );
 
   return {
     questions,
+    pending,
+    duplicates,
     questionMap,
     source,
     loadError,
@@ -326,5 +443,11 @@ export function useQuestionBank() {
     resetTree,
     updateQuestion,
     deleteQuestion,
+    reloadQuestions,
+    approvePending,
+    rejectPending,
+    refreshDuplicates,
+    dismissDuplicates,
+    replaceWithPending,
   };
 }

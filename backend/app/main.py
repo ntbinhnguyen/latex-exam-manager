@@ -17,6 +17,8 @@ with engine.begin() as conn:
     conn.execute(text("UPDATE questions SET status = 'active' WHERE status IS NULL"))
     # thời điểm xóa mềm (phục vụ trang Thùng rác)
     conn.execute(text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ"))
+    # các câu đã được xác nhận "không trùng" khi kiểm duyệt (kiểm tra trùng nội dung)
+    conn.execute(text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS dup_dismissed TEXT"))
 
 app = FastAPI(title=settings.PROJECT_NAME)
 

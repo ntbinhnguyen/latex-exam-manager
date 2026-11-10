@@ -14,6 +14,7 @@ import {
   FileJson,
   RotateCcw,
   AlertTriangle,
+  ClipboardCheck,
   RefreshCw,
   Zap,
   Hand,
@@ -180,6 +181,8 @@ export const SidebarTree: React.FC<SidebarTreeProps> = ({
 
                 {node.icon === "stack" ? (
                   <Layers className="h-4 w-4 shrink-0 text-[#8B4553]" />
+                ) : node.kind === "pending" ? (
+                  <ClipboardCheck className="h-4 w-4 shrink-0 text-sky-600" />
                 ) : node.kind === "unassigned" ? (
                   <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />
                 ) : (

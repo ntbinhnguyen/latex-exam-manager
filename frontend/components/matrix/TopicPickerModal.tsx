@@ -4,6 +4,7 @@ import React from "react";
 import { Modal } from "@/components/question-bank/Modal";
 import { SidebarTree } from "@/components/question-bank/SidebarTree";
 import type { TreeNode } from "@/components/question-bank/types";
+import { withoutPending } from "@/lib/tree";
 
 interface Props {
   tree: TreeNode[];
@@ -32,7 +33,7 @@ export const TopicPickerModal: React.FC<Props> = ({ tree, currentId, onPick, onC
   >
     <SidebarTree
       readOnly
-      treeData={tree}
+      treeData={withoutPending(tree)}
       selectedFolderId={currentId ?? "all"}
       onSelectFolder={(id) => onPick(id === "all" ? null : id)}
       maxHeightClass="max-h-[50vh]"

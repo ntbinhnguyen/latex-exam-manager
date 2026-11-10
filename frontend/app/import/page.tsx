@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { API } from "@/lib/api";
 import { Alert, Badge, Button, Card, Field, PageHeader } from "@/components/ui";
+import { ImportLogPanel } from "@/components/question-bank/ImportLogPanel";
 
 type ImportItem = {
   stt: number;
@@ -17,6 +18,7 @@ type ImportResult = {
   with_id_from_file?: number;
   auto_assigned?: number;
   without_id?: number;
+  duplicate_summary?: { exact: number; similar: number; diff_data: number; flagged: number } | null;
   items?: ImportItem[];
 };
 
@@ -35,6 +37,7 @@ export default function ImportPage() {
   const [items, setItems] = useState<ImportItem[]>([]);
   const [res, setRes] = useState<ImportResult | null>(null);
   const [err, setErr] = useState("");
+  const [logKey, setLogKey] = useState(0); // tăng lên để tải lại nhật ký sau mỗi lần nhập
   const reqId = useRef(0);
 
   // Chọn file → phân tích ngay để xem trước (chưa lưu vào ngân hàng)
@@ -65,7 +68,7 @@ export default function ImportPage() {
       const r = await fetch(`${API}/api/latex/upload-tex/`, { method: "POST", body: fd });
       const j = await r.json();
       if (!r.ok) throw new Error(typeof j.detail === "string" ? j.detail : "Nhập thất bại");
-      setRes(j); setItems(j.items ?? items); setFile(null);
+      setRes(j); setItems(j.items ?? items); setFile(null); setLogKey((k) => k + 1);
       if (fileRef.current) fileRef.current.value = "";
     } catch (e) { setErr(e instanceof Error ? e.message : "Lỗi không xác định"); }
     setBusy(false);
@@ -73,26 +76,32 @@ export default function ImportPage() {
 
   return (
     <>
-      <PageHeader title="Nhập đề LaTeX" desc="Tải file .tex (UTF-8) chứa các khối \begin{ex}…\end{ex}. Hệ thống tự nhận dạng loại câu, bóc tách ID, đáp án và lời giải; chọn file để xem trước rồi mới lưu." />
+      <PageHeader title="Nhập đề LaTeX" desc="Tải file .tex (UTF-8) chứa các khối \begin{ex}…\end{ex}. Hệ thống tự nhận dạng loại câu, bóc tách ID, đáp án và lời giải; chọn file để xem trước rồi mới nhập. Câu nhập vào nằm ở mục “Câu hỏi chờ kiểm duyệt”, bạn duyệt xong mới vào ngân hàng." />
       <div className="max-w-5xl space-y-6">
         <Card className="max-w-xl space-y-4">
           <Field label="File .tex">
             <input ref={fileRef} type="file" accept=".tex" onChange={(e) => onPick(e.target.files?.[0] ?? null)}
               className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-indigo-700" />
           </Field>
-          <Button onClick={submit} disabled={!file || busy || previewing || items.length === 0} className="w-full">{busy ? "Đang lưu…" : "Lưu vào ngân hàng"}</Button>
+          <Button onClick={submit} disabled={!file || busy || previewing || items.length === 0} className="w-full">{busy ? "Đang nhập…" : "Nhập vào mục chờ kiểm duyệt"}</Button>
           {file && !previewing && !err && items.length === 0 && <Alert kind="warn">Không tìm thấy khối \begin{"{"}ex{"}"}…\end{"{"}ex{"}"} nào trong file.</Alert>}
           {err && <Alert kind="error">{err}</Alert>}
           {res && (
             <Alert kind="success">
-              Đã lưu {res.total_saved}/{res.total_extracted} câu.{(res.with_id_from_file ?? 0) > 0 && <> {res.with_id_from_file} câu đã có sẵn ID trong file (giữ nguyên).</>}{(res.auto_assigned ?? 0) > 0 && <> {res.auto_assigned} câu được gắn ID mới.</>}{(res.without_id ?? 0) > 0 && <> {res.without_id} câu chưa có ID.</>} <Link href="/questions" className="font-medium underline">Xem ngân hàng câu hỏi →</Link>
+              Đã đưa {res.total_saved}/{res.total_extracted} câu vào mục “Câu hỏi chờ kiểm duyệt”.{(res.with_id_from_file ?? 0) > 0 && <> {res.with_id_from_file} câu đã có sẵn ID trong file (giữ nguyên).</>}{(res.auto_assigned ?? 0) > 0 && <> {res.auto_assigned} câu được gắn ID mới.</>}{(res.without_id ?? 0) > 0 && <> {res.without_id} câu chưa có ID.</>}
+              {res.duplicate_summary && res.duplicate_summary.exact + res.duplicate_summary.similar > 0 && (
+                <> ⚠ {res.duplicate_summary.exact + res.duplicate_summary.similar} câu nghi trùng nội dung — xem ở mục chờ kiểm duyệt.</>
+              )}
+              {res.duplicate_summary && res.duplicate_summary.diff_data > 0 && (
+                <> {res.duplicate_summary.diff_data} câu giống nhưng khác số liệu.</>
+              )} <Link href="/questions" className="font-medium underline">Vào trang Quản lý câu hỏi để duyệt →</Link>
             </Alert>
           )}
         </Card>
 
         <Card className="space-y-3">
           <div className="flex items-baseline justify-between">
-            <h2 className="font-medium">Bảng thống kê{res ? "" : items.length > 0 ? " (xem trước – chưa lưu)" : ""}</h2>
+            <h2 className="font-medium">Bảng thống kê{res ? "" : items.length > 0 ? " (xem trước – chưa nhập)" : ""}</h2>
             {items.length > 0 && <span className="text-xs text-slate-500">{items.length} câu</span>}
           </div>
           <div className="max-h-[32rem] overflow-auto rounded-lg border border-slate-200">
@@ -119,6 +128,10 @@ export default function ImportPage() {
               </tbody>
             </table>
           </div>
+        </Card>
+        <Card className="space-y-2">
+          <h2 className="font-medium">Nhật ký nhập file .tex</h2>
+          <ImportLogPanel refreshKey={logKey} />
         </Card>
       </div>
     </>

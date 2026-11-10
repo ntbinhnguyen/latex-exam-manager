@@ -39,6 +39,8 @@ class Question(Base):
     source_material = Column(String, nullable=True)
     status = Column(String, default="active") # active, hidden, archived (archived = đã xóa mềm)
     deleted_at = Column(DateTime(timezone=True), nullable=True) # thời điểm xóa mềm
+    # Danh sách id (JSON) các câu mà người dùng đã bấm "giữ cả hai (không trùng)" -> không cảnh báo lại
+    dup_dismissed = Column(Text, nullable=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

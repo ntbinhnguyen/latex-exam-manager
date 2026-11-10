@@ -6,8 +6,10 @@ import { useQuestionBank } from "@/lib/use-question-bank";
 import { downloadBlob, downloadText } from "@/lib/download";
 import { buildTex } from "@/lib/matrix-io";
 import { API } from "@/lib/api";
+import { PENDING_ID } from "@/lib/tree";
 import { Alert, Badge, Button, Card, Field, PageHeader } from "@/components/ui";
-import { UploadCloud, X } from "lucide-react";
+import { History, UploadCloud, X } from "lucide-react";
+import { ImportLogPanel } from "@/components/question-bank/ImportLogPanel";
 
 type ImportItem = {
   stt: number;
@@ -28,14 +30,20 @@ export default function QuestionsPage() {
 
   // Các State dành cho chức năng Nhập (Import)
   const [showImport, setShowImport] = useState(false);
+  // Nhật ký các file .tex đã nhập (logKey tăng lên để tải lại sau mỗi lần nhập)
+  const [showLog, setShowLog] = useState(false);
+  const [logKey, setLogKey] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [previewing, setPreviewing] = useState(false);
   const [items, setItems] = useState<ImportItem[]>([]);
-  const [res, setRes] = useState<{ total_extracted: number; total_saved: number; with_id_from_file?: number; auto_assigned?: number; without_id?: number } | null>(null);
+  const [res, setRes] = useState<{ total_extracted: number; total_saved: number; with_id_from_file?: number; auto_assigned?: number; without_id?: number; duplicate_summary?: { exact: number; similar: number; diff_data: number; flagged: number } | null } | null>(null);
   const [err, setErr] = useState("");
   const reqId = useRef(0);
+  // Yêu cầu dashboard mở mục "Câu hỏi chờ kiểm duyệt" (đổi nonce để chuyển được nhiều lần)
+  const [jumpTo, setJumpTo] = useState<{ id: string; nonce: number } | null>(null);
+  const openPending = () => setJumpTo({ id: PENDING_ID, nonce: Date.now() });
 
   // Chọn file -> phân tích ngay để xem trước thống kê (CHƯA lưu vào ngân hàng)
   async function onPickFile(f: File | null) {
@@ -71,8 +79,11 @@ export default function QuestionsPage() {
       setFile(null);
       if (fileRef.current) fileRef.current.value = "";
 
-      // Tải lại dữ liệu ngân hàng sau khi nhập xong
-      bank.reloadAutoTree();
+      setLogKey((k) => k + 1);
+
+      // Tải lại dữ liệu: câu vừa nhập nằm ở mục "Câu hỏi chờ kiểm duyệt" (chưa vào ngân hàng)
+      await bank.reloadQuestions();
+      openPending();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Lỗi không xác định");
     }
@@ -106,16 +117,34 @@ export default function QuestionsPage() {
     <div className="w-full space-y-4">
       {/* Khung Header với Nút Mở/Đóng Import */}
       <div className="flex items-center justify-between">
-        <PageHeader title="Quản lý câu hỏi" desc="Xem, sửa, xóa, gắn ID và bổ sung câu hỏi từ file LaTeX vào ngân hàng dữ liệu." />
-        <Button 
-          onClick={() => setShowImport(!showImport)}
-          className="flex items-center gap-2"
-          variant={showImport ? 'ghost' : 'primary'}
-        >
-          {showImport ? <X className="w-4 h-4" /> : <UploadCloud className="w-4 h-4" />}
-          {showImport ? "Đóng form nhập" : "Nhập đề LaTeX"}
-        </Button>
+        <PageHeader title="Quản lý câu hỏi" desc="Xem, sửa, xóa, gắn ID câu hỏi. Câu nhập từ file LaTeX sẽ vào mục “Câu hỏi chờ kiểm duyệt” để duyệt trước khi đưa vào ngân hàng." />
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            onClick={() => setShowLog(!showLog)}
+            className="flex items-center gap-2"
+            variant="ghost"
+          >
+            <History className="w-4 h-4" />
+            {showLog ? "Ẩn nhật ký nhập" : "Nhật ký nhập file"}
+          </Button>
+          <Button 
+            onClick={() => setShowImport(!showImport)}
+            className="flex items-center gap-2"
+            variant={showImport ? 'ghost' : 'primary'}
+          >
+            {showImport ? <X className="w-4 h-4" /> : <UploadCloud className="w-4 h-4" />}
+            {showImport ? "Đóng form nhập" : "Nhập đề LaTeX"}
+          </Button>
+        </div>
       </div>
+
+      {/* Nhật ký các file .tex đã nhập: ngày nhập, tên file, số câu + tìm kiếm */}
+      {showLog && (
+        <Card className="space-y-2">
+          <h2 className="text-sm font-medium text-slate-800">Nhật ký nhập file .tex</h2>
+          <ImportLogPanel refreshKey={logKey} />
+        </Card>
+      )}
 
       {/* Vùng Import (Chỉ hiện khi bấm nút) */}
       {showImport && (
@@ -125,24 +154,31 @@ export default function QuestionsPage() {
               <input ref={fileRef} type="file" accept=".tex" onChange={(e) => onPickFile(e.target.files?.[0] ?? null)}
                 className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" />
             </Field>
-            <p className="text-xs text-slate-500">Chọn file để xem trước bảng thống kê bên dưới, kiểm tra xong mới bấm lưu. Câu đã có ID ở dòng đầu khối (VD <code>\begin{"{"}ex{"}"}%[TN.M2.T2.C1.B3.05]</code>) sẽ được <b>giữ nguyên ID</b>; các câu còn lại để trống ID, bạn gắn sau trong ngân hàng câu hỏi.</p>
+            <p className="text-xs text-slate-500">Chọn file để xem trước bảng thống kê bên dưới, kiểm tra xong mới bấm nhập. Câu nhập vào <b>chưa vào ngân hàng ngay</b> mà nằm ở mục <b>“Câu hỏi chờ kiểm duyệt”</b> trên cây mục lục; bạn duyệt từng câu hoặc hàng loạt để đưa vào ngân hàng. Câu đã có ID ở dòng đầu khối (VD <code>\begin{"{"}ex{"}"}%[TN.M2.T2.C1.B3.05]</code>) sẽ được <b>giữ nguyên ID</b>; các câu còn lại để trống ID, bạn gắn sau trong ngân hàng câu hỏi.</p>
             <Button onClick={submitImport} disabled={!file || busy || previewing || items.length === 0} className="w-full h-10">
-              {busy ? "Đang lưu..." : "Lưu vào ngân hàng"}
+              {busy ? "Đang nhập..." : "Nhập vào mục chờ kiểm duyệt"}
             </Button>
             {file && !previewing && !err && items.length === 0 && <Alert kind="warn">Không tìm thấy khối \begin{"{"}ex{"}"}…\end{"{"}ex{"}"} nào trong file.</Alert>}
             {err && <Alert kind="error">{err}</Alert>}
             {res && (
               <Alert kind="success">
-                Đã lưu {res.total_saved}/{res.total_extracted} câu vào ngân hàng.
+                Đã đưa {res.total_saved}/{res.total_extracted} câu vào mục “Câu hỏi chờ kiểm duyệt” (chưa vào ngân hàng).
                 {(res.with_id_from_file ?? 0) > 0 && <> {res.with_id_from_file} câu đã có sẵn ID trong file (giữ nguyên ID).</>}
-                {(res.without_id ?? 0) > 0 && <> {res.without_id} câu chưa có ID — bạn có thể gắn sau trong ngân hàng câu hỏi.</>}
+                {(res.without_id ?? 0) > 0 && <> {res.without_id} câu chưa có ID — bạn có thể gắn ID ngay khi kiểm duyệt.</>}
+                {res.duplicate_summary && res.duplicate_summary.exact + res.duplicate_summary.similar > 0 && (
+                  <> ⚠ {res.duplicate_summary.exact + res.duplicate_summary.similar} câu nghi trùng nội dung — xem ở mục chờ kiểm duyệt.</>
+                )}
+                {res.duplicate_summary && res.duplicate_summary.diff_data > 0 && (
+                  <> {res.duplicate_summary.diff_data} câu giống nhưng khác số liệu.</>
+                )}{" "}
+                <button type="button" onClick={openPending} className="font-medium underline">Mở mục chờ kiểm duyệt →</button>
               </Alert>
             )}
           </Card>
 
           <Card className="space-y-3 border-none shadow-sm">
             <div className="flex items-baseline justify-between">
-              <h2 className="font-medium text-sm text-slate-800">Bảng thống kê{res ? "" : items.length > 0 ? " (xem trước – chưa lưu)" : ""}</h2>
+              <h2 className="font-medium text-sm text-slate-800">Bảng thống kê{res ? "" : items.length > 0 ? " (xem trước – chưa nhập)" : ""}</h2>
               {items.length > 0 && <span className="text-xs text-slate-500">{items.length} câu</span>}
             </div>
             <div className="max-h-[28rem] overflow-auto rounded-lg border border-slate-200">
@@ -190,6 +226,13 @@ export default function QuestionsPage() {
         onSaveContent={(id, raw) => bank.updateQuestion(id, { raw })}
         onSaveId={(id, code) => bank.updateQuestion(id, { code })}
         onDeleteQuestion={bank.deleteQuestion}
+        pendingQuestions={bank.pending}
+        onApprovePending={bank.approvePending}
+        onRejectPending={bank.rejectPending}
+        duplicates={bank.duplicates}
+        onDismissDuplicates={bank.dismissDuplicates}
+        onReplaceWithPending={bank.replaceWithPending}
+        jumpTo={jumpTo}
         onExportAction={handleExport}
       />
     </div>

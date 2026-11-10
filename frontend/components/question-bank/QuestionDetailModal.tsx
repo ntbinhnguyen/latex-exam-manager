@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Check, ChevronLeft, ChevronRight, Pencil, Plus, Tag, Trash2 } from "lucide-react";
+import { AlertTriangle, Check, CheckCheck, ChevronLeft, ChevronRight, Pencil, Plus, Tag, Trash2 } from "lucide-react";
 import { Modal } from "./Modal";
 import { LevelChips } from "./LevelChips";
 import { QuestionBody } from "./QuestionBody";
+import { DuplicateComparePanel } from "./DuplicateComparePanel";
 import { QidAssigner, idForType, validateQid } from "./QidAssigner";
-import type { QuestionItem, TreeNode } from "./types";
+import type { DupMatch, QuestionItem, TreeNode } from "./types";
 import { flattenTree, hasValidId } from "@/lib/tree";
 import { ancestorKeys, isAssignable, parseQid, typeAbbrOfLabel } from "@/lib/qid";
 
@@ -26,6 +27,18 @@ interface Props {
   onSaveContent?: (id: string, raw: string) => Promise<void>;
   onSaveId?: (id: string, code: string) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
+  /** Có = câu đang chờ kiểm duyệt: hiện nút "Duyệt vào ngân hàng" */
+  onApprove?: (id: string) => Promise<void>;
+  /** Các câu nghi trùng với câu này (mục chờ kiểm duyệt): hiện bảng cảnh báo + so sánh cạnh nhau */
+  duplicates?: DupMatch[];
+  /** Tìm nội dung câu khác theo id (để so sánh) */
+  resolveQuestion?: (id: string) => QuestionItem | undefined;
+  /** "Giữ cả hai (không trùng)" */
+  onDismissDup?: (id: string) => Promise<void>;
+  /** Thay thế câu cũ trong ngân hàng bằng câu này */
+  onReplaceDup?: (id: string, oldId: string) => Promise<void>;
+  /** Từ chối câu này (chuyển vào Thùng rác) */
+  onRejectNew?: (id: string) => Promise<void>;
 }
 
 type Mode = "view" | "edit" | "assign";
@@ -49,6 +62,12 @@ export const QuestionDetailModal: React.FC<Props> = ({
   onSaveContent,
   onSaveId,
   onDelete,
+  onApprove,
+  duplicates,
+  resolveQuestion,
+  onDismissDup,
+  onReplaceDup,
+  onRejectNew,
 }) => {
   const [mode, setMode] = useState<Mode>("view");
   const [draftRaw, setDraftRaw] = useState("");
@@ -119,6 +138,7 @@ export const QuestionDetailModal: React.FC<Props> = ({
       () => onSaveId!(question.id, draftId),
       () => setMode("view"),
     );
+  const approve = () => run(() => onApprove!(question.id));
   const remove = () => {
     const ok = window.confirm(
       `Xóa câu này khỏi ngân hàng?\n\n${validId ? question.code : "(chưa có ID)"}\n\nCâu hỏi sẽ được chuyển vào Thùng rác (xóa mềm), bạn có thể phục hồi hoặc xóa hẳn tại trang Thùng rác.`,
@@ -143,6 +163,16 @@ export const QuestionDetailModal: React.FC<Props> = ({
           {position && <span className="pl-1 text-xs text-gray-500">{position}</span>}
         </div>
         <div className="flex items-center gap-1.5">
+          {onApprove && (
+            <button
+              type="button"
+              onClick={approve}
+              disabled={busy}
+              className="flex h-8 items-center gap-1 rounded bg-emerald-600 px-3 text-xs font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <CheckCheck className="h-3.5 w-3.5" /> {busy ? "ĐANG DUYỆT…" : "DUYỆT VÀO NGÂN HÀNG"}
+            </button>
+          )}
           {onAddQuestion && (
             <button
               type="button"
@@ -190,7 +220,7 @@ export const QuestionDetailModal: React.FC<Props> = ({
 
   return (
     <Modal
-      widthClass="max-w-3xl"
+      widthClass={duplicates && duplicates.length > 0 && !editing ? "max-w-6xl" : "max-w-3xl"}
       onClose={editing ? cancel : onClose}
       title={
         <>
@@ -285,7 +315,21 @@ export const QuestionDetailModal: React.FC<Props> = ({
           </div>
         </div>
       ) : (
-        <QuestionBody question={question} />
+        <>
+          {duplicates && duplicates.length > 0 && resolveQuestion && (
+            <DuplicateComparePanel
+              key={question.id}
+              current={question}
+              matches={duplicates}
+              resolve={resolveQuestion}
+              busy={busy}
+              onDismiss={onDismissDup ? () => run(() => onDismissDup(question.id)) : undefined}
+              onReplace={onReplaceDup ? (oldId) => run(() => onReplaceDup(question.id, oldId)) : undefined}
+              onReject={onRejectNew ? () => run(() => onRejectNew(question.id)) : undefined}
+            />
+          )}
+          <QuestionBody question={question} />
+        </>
       )}
     </Modal>
   );

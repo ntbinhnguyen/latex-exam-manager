@@ -1,3 +1,4 @@
+import json
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import func
@@ -10,6 +11,7 @@ from app.models.exam import ExamQuestion
 from app.schemas.question import QuestionUpdate
 from app.services.latex_parser import parse_latex_file, qid_from_raw, TYPE_ABBR
 from app.services.question_id import retype_qid, embed_qid, is_valid_qid
+from app.services.duplicate_checker import find_duplicates, blocking_matches, summarize
 
 router = APIRouter()
 
@@ -18,7 +20,8 @@ def get_questions(skip: int = 0, limit: int = 50, q: Optional[str] = None,
                   question_type: Optional[str] = None, difficulty_level: Optional[str] = None,
                   chapter: Optional[str] = None, db: Session = Depends(get_db)):
     """Lấy danh sách câu hỏi (phân trang + bộ lọc)"""
-    query = db.query(Question).filter(Question.status != "archived")
+    # Ngân hàng chỉ gồm câu đã duyệt: loại câu đã xóa mềm (archived) và câu đang chờ kiểm duyệt (pending)
+    query = db.query(Question).filter(Question.status.notin_(["archived", "pending"]))
     if q:
         query = query.filter(Question.content_latex.ilike(f"%{q}%"))
     if question_type:
@@ -30,6 +33,141 @@ def get_questions(skip: int = 0, limit: int = 50, q: Optional[str] = None,
     total = query.count()
     data = query.order_by(Question.created_at.desc()).offset(skip).limit(limit).all()
     return {"total": total, "data": data}
+
+# ---------------------------------------------------------------------------
+# CÂU HỎI CHỜ KIỂM DUYỆT: câu mới nhập từ file .tex có status = "pending".
+# Duyệt xong (approve) mới chuyển sang "active" = chính thức vào ngân hàng.
+# Lưu ý: các đường dẫn tĩnh /pending... phải khai báo TRƯỚC "/{question_id}".
+# ---------------------------------------------------------------------------
+
+class PendingBulk(BaseModel):
+    ids: List[UUID] = []
+    all: bool = False  # true = áp dụng cho toàn bộ câu đang chờ duyệt (bỏ qua ids)
+    # false (mặc định): câu nghi trùng sẽ bị BỎ QUA khi duyệt (kiểm tra lại ngay lúc duyệt);
+    # true: người dùng đã xem cảnh báo và vẫn muốn duyệt.
+    force: bool = False
+
+
+class DismissBody(BaseModel):
+    other_ids: List[UUID] = []  # rỗng = bỏ cảnh báo với tất cả các câu đang bị coi là trùng
+
+
+class ReplaceBody(BaseModel):
+    old_id: UUID  # câu cũ trong ngân hàng sẽ bị thay thế (chuyển vào Thùng rác)
+
+
+def _dup_pool(db: Session):
+    """Tập để so sánh: ngân hàng + các câu chờ duyệt (không gồm câu đã xóa)."""
+    return db.query(Question).filter(Question.status != "archived").all()
+
+
+def _pending_query(db: Session, ids: Optional[List[UUID]] = None, everything: bool = False):
+    query = db.query(Question).filter(Question.status == "pending")
+    if not everything:
+        query = query.filter(Question.id.in_(ids or []))
+    return query
+
+
+@router.get("/pending")
+def list_pending(skip: int = 0, limit: int = 50, q: Optional[str] = None,
+                 db: Session = Depends(get_db)):
+    """Danh sách câu hỏi chờ kiểm duyệt (theo đúng thứ tự trong file đã nhập)."""
+    query = db.query(Question).filter(Question.status == "pending")
+    if q:
+        like = f"%{q}%"
+        query = query.filter(Question.content_latex.ilike(like) | Question.question_code.ilike(like))
+    total = query.count()
+    data = query.order_by(Question.created_at.asc(), Question.id.asc()).offset(skip).limit(limit).all()
+    return {"total": total, "data": data}
+
+
+@router.get("/pending/duplicates")
+def pending_duplicates(db: Session = Depends(get_db)):
+    """Kiểm tra trùng nội dung cho các câu đang chờ duyệt (so với ngân hàng và với nhau).
+
+    Cùng ID & giống >= 80% -> nghi trùng; khác ID cần >= 90%. Hai câu giống nhưng khác số liệu /
+    đáp án chỉ gắn nhãn "diff_data". Luôn tính lại nên phản ánh đúng ngân hàng hiện tại.
+    """
+    pending = db.query(Question).filter(Question.status == "pending").all()
+    if not pending:
+        return {"duplicates": {}, "summary": summarize({})}
+    dups = find_duplicates(pending, _dup_pool(db))
+    return {"duplicates": dups, "summary": summarize(dups)}
+
+
+@router.post("/pending/approve")
+def approve_pending(body: PendingBulk, db: Session = Depends(get_db)):
+    """Duyệt nhiều câu (hoặc toàn bộ câu chờ duyệt): chuyển vào ngân hàng chính thức.
+
+    Kiểm tra trùng LẠI ngay lúc duyệt (ngân hàng / nội dung có thể đã đổi). Câu nghi trùng
+    (exact / similar) bị bỏ qua và trả về trong `skipped`, trừ khi `force = true`.
+    Nhãn "giống nhưng khác số liệu" không chặn việc duyệt.
+    """
+    items = _pending_query(db, body.ids, body.all).all()
+    blocked = {}
+    if items and not body.force:
+        dups = find_duplicates(items, _dup_pool(db))
+        blocked = {qid: bm for qid, ms in dups.items() if (bm := blocking_matches(ms))}
+    approved = 0
+    skipped = []
+    for item in items:
+        if str(item.id) in blocked:
+            skipped.append({"id": str(item.id), "matches": blocked[str(item.id)]})
+            continue
+        item.status = "active"
+        approved += 1
+    db.commit()
+    msg = f"Đã duyệt {approved} câu hỏi vào ngân hàng"
+    if skipped:
+        msg += f"; bỏ qua {len(skipped)} câu nghi trùng"
+    return {"approved": approved, "skipped": skipped, "message": msg}
+
+
+@router.post("/pending/{question_id}/dismiss-duplicates")
+def dismiss_duplicates(question_id: UUID, body: DismissBody, db: Session = Depends(get_db)):
+    """"Giữ cả hai": xác nhận câu này KHÔNG trùng với các câu đang bị cảnh báo -> không cảnh báo lại."""
+    q = db.query(Question).filter(Question.id == question_id, Question.status == "pending").first()
+    if not q:
+        raise HTTPException(status_code=404, detail="Không tìm thấy câu hỏi chờ kiểm duyệt")
+    if body.other_ids:
+        targets = [str(i) for i in body.other_ids]
+    else:
+        targets = [m["other_id"] for m in find_duplicates([q], _dup_pool(db)).get(str(q.id), [])]
+    current = set(json.loads(q.dup_dismissed or "[]"))
+    current.update(targets)
+    q.dup_dismissed = json.dumps(sorted(current))
+    db.commit()
+    return {"dismissed": len(targets)}
+
+
+@router.post("/pending/{question_id}/replace")
+def replace_with_pending(question_id: UUID, body: ReplaceBody, db: Session = Depends(get_db)):
+    """Thay thế câu cũ trong ngân hàng bằng câu mới: duyệt câu mới, câu cũ vào Thùng rác (phục hồi được)."""
+    new = db.query(Question).filter(Question.id == question_id, Question.status == "pending").first()
+    if not new:
+        raise HTTPException(status_code=404, detail="Không tìm thấy câu hỏi chờ kiểm duyệt")
+    old = db.query(Question).filter(
+        Question.id == body.old_id, Question.status.notin_(["archived", "pending"])
+    ).first()
+    if not old:
+        raise HTTPException(status_code=404, detail="Không tìm thấy câu cũ trong ngân hàng để thay thế")
+    new.status = "active"
+    old.status = "archived"
+    old.deleted_at = func.now()
+    db.commit()
+    return {"approved": 1, "replaced": str(old.id), "message": "Đã thay thế câu cũ bằng câu mới"}
+
+
+@router.post("/pending/reject")
+def reject_pending(body: PendingBulk, db: Session = Depends(get_db)):
+    """Từ chối nhiều câu chờ duyệt: chuyển vào Thùng rác (vẫn phục hồi được)."""
+    items = _pending_query(db, body.ids, body.all).all()
+    for item in items:
+        item.status = "archived"
+        item.deleted_at = func.now()
+    db.commit()
+    return {"rejected": len(items), "message": f"Đã chuyển {len(items)} câu hỏi vào Thùng rác"}
+
 
 # ---------------------------------------------------------------------------
 # THÙNG RÁC: quản lý câu hỏi đã xóa mềm (status = "archived")
