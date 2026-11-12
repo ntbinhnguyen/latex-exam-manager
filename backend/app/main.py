@@ -20,6 +20,18 @@ with engine.begin() as conn:
     # các câu đã được xác nhận "không trùng" khi kiểm duyệt (kiểm tra trùng nội dung)
     conn.execute(text("ALTER TABLE questions ADD COLUMN IF NOT EXISTS dup_dismissed TEXT"))
 
+# Supabase: bật Row-Level Security (RLS) cho mọi bảng của ứng dụng.
+# Backend kết nối thẳng bằng DATABASE_URL (vai trò postgres bỏ qua RLS) nên vẫn đọc/ghi bình thường,
+# còn API REST công khai của Supabase (khóa anon) bị chặn hoàn toàn -> hết cảnh báo "rls_disabled_in_public".
+# Lệnh này lặp lại nhiều lần vẫn an toàn; bảng mới tạo (create_all) cũng được bật RLS ngay lần khởi động sau.
+if engine.dialect.name == "postgresql":
+    for _table in Base.metadata.sorted_tables:
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(f'ALTER TABLE public."{_table.name}" ENABLE ROW LEVEL SECURITY'))
+        except Exception as exc:  # noqa: BLE001 - không để lỗi quyền làm app không khởi động
+            print(f"[RLS] Không bật được RLS cho bảng {_table.name}: {exc}")
+
 app = FastAPI(title=settings.PROJECT_NAME)
 
 from app.tikz_render import router as tikz_router
