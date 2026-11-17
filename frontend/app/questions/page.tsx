@@ -10,6 +10,7 @@ import { PENDING_ID } from "@/lib/tree";
 import { Alert, Badge, Button, Card, Field, PageHeader } from "@/components/ui";
 import { History, UploadCloud, X } from "lucide-react";
 import { ImportLogPanel } from "@/components/question-bank/ImportLogPanel";
+import { PdfExportDialog } from "@/components/question-bank/PdfExportDialog";
 
 type ImportItem = {
   stt: number;
@@ -32,6 +33,8 @@ export default function QuestionsPage() {
   const [showImport, setShowImport] = useState(false);
   // Nhật ký các file .tex đã nhập (logKey tăng lên để tải lại sau mỗi lần nhập)
   const [showLog, setShowLog] = useState(false);
+  // Xuất PDF: danh sách id các câu đang được chọn (null = đóng hộp thoại)
+  const [pdfIds, setPdfIds] = useState<string[] | null>(null);
   const [logKey, setLogKey] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -93,7 +96,10 @@ export default function QuestionsPage() {
   // Xử lý xuất file
   const handleExport = async (format: string, selectedIds: string[]) => {
     const list = selectedIds.map((id) => bank.questionMap.get(id)).filter((q) => q !== undefined);
-    if (format === "latex") {
+    if (format === "pdf") {
+      if (selectedIds.length === 0) return;
+      setPdfIds(selectedIds);
+    } else if (format === "latex") {
       downloadText(buildTex(list, { name: "Ngân hàng câu hỏi", solutions: true }), `ngan-hang-cau-hoi-${Date.now()}.tex`);
     } else if (format === "excel") {
       const XLSX = await import("xlsx");
@@ -235,6 +241,8 @@ export default function QuestionsPage() {
         jumpTo={jumpTo}
         onExportAction={handleExport}
       />
+
+      {pdfIds && <PdfExportDialog ids={pdfIds} defaultTitle="Ngân hàng câu hỏi" onClose={() => setPdfIds(null)} />}
     </div>
   );
 }

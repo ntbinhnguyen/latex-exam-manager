@@ -1,11 +1,14 @@
 FROM python:3.12-slim
 
-# Cài đặt TeX Live để render LaTeX/TikZ (Rất quan trọng)
+# Cài đặt TeX Live để render LaTeX/TikZ và biên dịch PDF (Rất quan trọng)
+# texlive-lang-other (gói vntex) + lmodern: bắt buộc để biên dịch PDF tiếng Việt (fontenc T5)
 RUN apt-get update && apt-get install -y \
     texlive-latex-base \
     texlive-latex-extra \
     texlive-fonts-recommended \
     texlive-pictures \
+    texlive-lang-other \
+    lmodern \
     ghostscript \
     && rm -rf /var/lib/apt/lists/*
 

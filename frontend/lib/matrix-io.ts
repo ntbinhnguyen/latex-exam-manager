@@ -143,7 +143,15 @@ export async function importMatrixFile(
     const qid = String(field(it, ["id_cau_hoi", "questionid", "question_id"]) ?? "").trim();
     const code = String(field(it, ["ma_cau_hoi", "code"]) ?? "").trim();
     let q = qid ? qById.get(qid) : undefined;
-    if (!q && code) q = questions.find((x) => x.code === code && !used.has(x.id) && normType(x.type) === row.type);
+    const lookupCode = code || (!q && qid ? qid : "");
+    if (!q && lookupCode) {
+      const candidates = questions.filter(
+        (x) => x.code === lookupCode && !used.has(x.id) && normType(x.type) === row.type,
+      );
+      if (candidates.length > 0) {
+        q = candidates[Math.floor(Math.random() * candidates.length)];
+      }
+    }
     if (q && !used.has(q.id)) {
       used.add(q.id);
       row.questionId = q.id;

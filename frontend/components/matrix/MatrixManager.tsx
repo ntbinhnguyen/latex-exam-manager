@@ -25,6 +25,7 @@ import { useQuestionBank } from "@/lib/use-question-bank";
 import { belongsTo, nodeIdForQuestion } from "@/lib/tree";
 import { loadJson, saveJson } from "@/lib/storage";
 import { downloadText } from "@/lib/download";
+import { PdfExportDialog } from "@/components/question-bank/PdfExportDialog";
 import { buildTex, exportMatrixJson, exportMatrixXlsx, importMatrixFile } from "@/lib/matrix-io";
 import { Modal } from "@/components/question-bank/Modal";
 import { LatexRenderer } from "@/components/question-bank/LatexRenderer";
@@ -314,6 +315,17 @@ export function MatrixManager() {
     }
   };
 
+  // Xuất PDF: các câu đã có trong ma trận, theo thứ tự các dòng
+  const [pdfIds, setPdfIds] = useState<string[] | null>(null);
+  const exportPdf = () => {
+    setFileMenu(false);
+    if (filledList.length === 0) {
+      notify("Chưa có câu hỏi nào trong ma trận để xuất.");
+      return;
+    }
+    setPdfIds(filledList.map((q) => q.id));
+  };
+
   const exportTex = (solutions: boolean) => {
     setFileMenu(false);
     if (filledList.length === 0) {
@@ -558,6 +570,9 @@ export function MatrixManager() {
                 <>
                   <div className="fixed inset-0 z-20" onClick={() => setFileMenu(false)} />
                   <div className="absolute bottom-full right-0 z-30 mb-1 w-60 rounded-md border border-gray-200 bg-white py-1 text-xs text-gray-700 shadow-lg">
+                    <button type="button" className="w-full px-3 py-2 text-left font-semibold text-[#4A0E17] hover:bg-gray-100" onClick={exportPdf}>
+                      PDF (.pdf) – biên dịch các câu đã chọn…
+                    </button>
                     <button type="button" className="w-full px-3 py-2 text-left hover:bg-gray-100" onClick={() => exportTex(false)}>
                       LaTeX (.tex) – đề, không lời giải
                     </button>
@@ -588,6 +603,15 @@ export function MatrixManager() {
       </aside>
 
       {/* ===== Các hộp thoại ===== */}
+      {pdfIds && (
+        <PdfExportDialog
+          ids={pdfIds}
+          defaultTitle="Đề thi"
+          allowMultiExam
+          defaultDocType="exam"
+          onClose={() => setPdfIds(null)}
+        />
+      )}
       {pickerTarget && (
         <QuestionPickerModal
           row={pickerTarget}

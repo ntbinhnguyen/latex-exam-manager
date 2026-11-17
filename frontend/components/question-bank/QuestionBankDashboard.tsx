@@ -437,8 +437,8 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
 
   const handleExport = (format: "latex" | "docx" | "pdf" | "excel") => {
     const ids = selectedIds.size > 0 ? Array.from(selectedIds) : filtered.map((q) => q.id);
-    if (format !== "latex" && format !== "excel") {
-      showToast("Định dạng này sẽ được bổ sung – hiện hỗ trợ LaTeX (.tex) và Excel.");
+    if (format !== "latex" && format !== "excel" && format !== "pdf") {
+      showToast("Định dạng này sẽ được bổ sung – hiện hỗ trợ LaTeX (.tex), PDF và Excel.");
       return;
     }
     onExportAction?.(format, ids);
