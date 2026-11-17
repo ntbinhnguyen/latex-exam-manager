@@ -176,8 +176,20 @@ def _read_braced_group(text: str, pos: int) -> Optional[Tuple[int, int, str]]:
     return None
 
 
-def shuffle_choice_options(content: str, rng: random.Random) -> str:
-    """Xáo trộn 4 phương án A, B, C, D trong lệnh \\choice (không đụng \\choiceTF)."""
+def _balanced_choice_targets(n: int, rng: random.Random) -> List[int]:
+    """Tạo danh sách n vị trí đáp án đúng (0=A, 1=B, 2=C, 3=D) cân bằng và xáo trộn ngẫu nhiên."""
+    if n <= 0:
+        return []
+    q, r = divmod(n, 4)
+    targets = [0, 1, 2, 3] * q + rng.sample([0, 1, 2, 3], r)
+    rng.shuffle(targets)
+    return targets
+
+
+def shuffle_choice_options(content: str, rng: random.Random, target_pos: Optional[int] = None) -> str:
+    """Xáo trộn 4 phương án A, B, C, D trong lệnh \\choice (không đụng \\choiceTF).
+    Nếu có target_pos (0..3), đặt phương án chứa \\True vào đúng vị trí đó và xáo trộn 3 phương án nhiễu còn lại.
+    """
     m = re.search(r"\\choice(?![A-Za-z])", content)
     if not m:
         return content
@@ -199,7 +211,18 @@ def shuffle_choice_options(content: str, rng: random.Random) -> str:
         cur = grp[1]
 
     inners = [g[2] for g in groups]
-    rng.shuffle(inners)
+    if target_pos is not None and 0 <= target_pos < 4:
+        true_idx = next((idx for idx, inner in enumerate(inners) if re.search(r"\\True(?![A-Za-z])", inner)), None)
+        if true_idx is not None:
+            correct = inners[true_idx]
+            others = [inners[idx] for idx in range(4) if idx != true_idx]
+            rng.shuffle(others)
+            other_it = iter(others)
+            inners = [correct if idx == target_pos else next(other_it) for idx in range(4)]
+        else:
+            rng.shuffle(inners)
+    else:
+        rng.shuffle(inners)
 
     # Ghép lại, giữ nguyên khoảng trắng/xuống dòng giữa các nhóm
     parts: List[str] = [content[: groups[0][0]]]
@@ -332,10 +355,10 @@ def build_tex(
     unpacked = [(_unpack_item(it), idx) for idx, it in enumerate(items, start=1)]
     has_types = group_by_type and any(qtype in SECTION_META for (_, _, qtype), _ in unpacked)
 
-    def render_question(code: str, content: str, qtype: Optional[str]) -> str:
+    def render_question(code: str, content: str, qtype: Optional[str], target_pos: Optional[int] = None) -> str:
         c = content
         if shuffle_choices and (qtype == "Trắc nghiệm nhiều lựa chọn" or qtype is None):
-            c = shuffle_choice_options(c, rng)
+            c = shuffle_choice_options(c, rng, target_pos=target_pos)
         return _prepare_question_tex(code, c, show_ids)
 
     body: List[str] = []
@@ -359,15 +382,28 @@ def build_tex(
             if key in SECTION_META:
                 roman = ROMAN_NUMERALS[sec_idx] if sec_idx < len(ROMAN_NUMERALS) else str(sec_idx + 1)
                 body.append(_section_header(roman, key, len(sec_items)))
-            for (code, content, qtype), orig_idx in sec_items:
-                q_tex = render_question(code, content, qtype)
+            # Chỉ cân bằng A, B, C, D đối với PHẦN I (Trắc nghiệm nhiều lựa chọn)
+            targets = (
+                _balanced_choice_targets(len(sec_items), rng)
+                if (shuffle_choices and key == "Trắc nghiệm nhiều lựa chọn")
+                else None
+            )
+            for idx_in_sec, ((code, content, qtype), orig_idx) in enumerate(sec_items):
+                t_pos = targets[idx_in_sec] if targets is not None else None
+                q_tex = render_question(code, content, qtype, target_pos=t_pos)
                 body.append(f"\\typeout{{@@Q {orig_idx}}}\n{q_tex}\n")
     else:
         seq = list(unpacked)
         if shuffle_questions:
             rng.shuffle(seq)
-        for (code, content, qtype), orig_idx in seq:
-            q_tex = render_question(code, content, qtype)
+        mc_indices = [
+            i for i, ((_, _, qtype), _) in enumerate(seq)
+            if shuffle_choices and (qtype == "Trắc nghiệm nhiều lựa chọn" or qtype is None)
+        ]
+        mc_targets = _balanced_choice_targets(len(mc_indices), rng)
+        target_map = dict(zip(mc_indices, mc_targets))
+        for seq_idx, ((code, content, qtype), orig_idx) in enumerate(seq):
+            q_tex = render_question(code, content, qtype, target_pos=target_map.get(seq_idx))
             body.append(f"\\typeout{{@@Q {orig_idx}}}\n{q_tex}\n")
 
     return preamble + head + "\n".join(body) + "\n\\end{document}\n"

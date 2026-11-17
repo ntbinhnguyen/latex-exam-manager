@@ -326,7 +326,7 @@ export const PdfExportDialog: React.FC<Props> = ({
                 onChange={(e) => setShuffle(e.target.checked)}
                 className="accent-[#4A0E17]"
               />
-              Xáo trộn thứ tự câu hỏi trong từng phần &amp; 4 phương án A, B, C, D
+              Xáo trộn câu hỏi trong từng phần &amp; cân bằng đáp án A, B, C, D (PHẦN I)
             </label>
             {effectiveNumExams > 1 && (
               <p className="text-[11px] text-amber-800">
