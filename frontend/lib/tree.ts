@@ -25,6 +25,11 @@ export interface TreeParseResult {
 export const UNASSIGNED_ID = "unassigned";
 /** Mục "Câu hỏi chờ kiểm duyệt": chứa câu mới nhập từ file .tex, chưa thuộc ngân hàng. */
 export const PENDING_ID = "pending";
+export const PENDING_FILE_PREFIX = "pending::";
+export const isPendingFolderId = (id: string): boolean =>
+  id === PENDING_ID || id.startsWith(PENDING_FILE_PREFIX);
+export const pendingFileFromId = (id: string): string | null =>
+  id.startsWith(PENDING_FILE_PREFIX) ? id.slice(PENDING_FILE_PREFIX.length) : null;
 
 export const norm = (s: string): string =>
   s
@@ -241,7 +246,11 @@ export function buildTree(rows: FlatRow[], extraCodes: Iterable<string> = []): T
  * và mục "Chưa gắn ID" (nếu có), rồi tính số câu cho từng mục.
  * `pendingCount` là số câu đang chờ duyệt – KHÔNG tính vào số câu của "Tất cả" vì chưa thuộc ngân hàng.
  */
-export function withCounts(roots: TreeNode[], questions: QuestionItem[], pendingCount = 0): TreeNode[] {
+export function withCounts(
+  roots: TreeNode[],
+  questions: QuestionItem[],
+  pending: QuestionItem[] | number = 0,
+): TreeNode[] {
   const counts = new Map<string, number>();
   let unassigned = 0;
   for (const q of questions) {
@@ -255,7 +264,29 @@ export function withCounts(roots: TreeNode[], questions: QuestionItem[], pending
     children: n.children?.map(apply),
   });
   const children = roots.map(apply);
-  
+
+  const pendingList = Array.isArray(pending) ? pending : null;
+  const pendingCount = pendingList ? pendingList.length : pending;
+  const pendingChildren: TreeNode[] = [];
+  if (pendingList && pendingList.length > 0) {
+    const byFile = new Map<string, number>();
+    for (const q of pendingList) {
+      const name = q.sourceFile?.trim() || "Chưa rõ nguồn";
+      byFile.set(name, (byFile.get(name) ?? 0) + 1);
+    }
+    for (const [name, cnt] of byFile.entries()) {
+      if (cnt <= 0) continue; // tự xóa mục con khi số câu hỏi bằng 0
+      pendingChildren.push({
+        id: `${PENDING_FILE_PREFIX}${name}`,
+        title: name,
+        count: cnt,
+        icon: "folder",
+        level: 2,
+        kind: "pending",
+      });
+    }
+  }
+
   children.push({
     id: PENDING_ID,
     title: "Câu hỏi chờ kiểm duyệt",
@@ -263,6 +294,8 @@ export function withCounts(roots: TreeNode[], questions: QuestionItem[], pending
     icon: "folder",
     level: 1,
     kind: "pending",
+    isOpenDefault: pendingChildren.length > 0,
+    children: pendingChildren.length > 0 ? pendingChildren : undefined,
   });
 
   if (unassigned > 0) {

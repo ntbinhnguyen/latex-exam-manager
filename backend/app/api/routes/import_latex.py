@@ -91,11 +91,14 @@ async def upload_tex_file(
     saved_count = 0
     # Mốc thời gian gốc: mỗi câu lệch nhau 1 micro-giây để giữ ĐÚNG thứ tự câu trong file khi hiển thị
     base_time = datetime.now(timezone.utc)
+    source_name = os.path.basename(file.filename or "") or "(không tên)"
     items = []         # thống kê từng câu: STT | Loại câu hỏi | ID | Đáp án
     from_file = 0      # câu đã có sẵn ID trong file .tex
     auto_assigned = 0  # câu được gắn ID theo Lớp/Chương/Bài chọn ở form
     # Lưu vào Database
     for q_data in parse_result["questions"]:
+        if not q_data.get("source_material"):
+            q_data["source_material"] = source_name
         if q_data.pop("_id_from_file", False):
             from_file += 1            # ID trong file được ưu tiên hơn ID tự gắn
         elif auto_id:
@@ -123,7 +126,7 @@ async def upload_tex_file(
 
     # Ghi nhật ký nhập file (không làm hỏng việc nhập nếu ghi nhật ký gặp lỗi)
     try:
-        db.add(ImportLog(filename=os.path.basename(file.filename or "") or "(không tên)", question_count=saved_count))
+        db.add(ImportLog(filename=source_name, question_count=saved_count))
         db.commit()
     except Exception:  # noqa: BLE001
         db.rollback()

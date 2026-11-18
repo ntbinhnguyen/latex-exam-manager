@@ -18,7 +18,7 @@ import { StatsPanel } from "./StatsPanel";
 import { QuestionGrid } from "./QuestionGrid";
 import { QuestionDetailModal } from "./QuestionDetailModal";
 import { BulkQidModal } from "./BulkQidModal";
-import { PENDING_ID, belongsTo, findNode, hasValidId } from "@/lib/tree";
+import { PENDING_ID, belongsTo, findNode, hasValidId, isPendingFolderId, pendingFileFromId } from "@/lib/tree";
 import { DUP_LABEL, hasBlocking, isBlockingKind, worstMatch } from "@/lib/duplicates";
 import type { TreeMode } from "@/lib/use-question-bank";
 
@@ -142,10 +142,14 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Mục đang chọn (nếu cây vừa được nạp lại và mục cũ không còn → về "Tất cả")
-  const activeNode = findNode(treeData, folderId) ?? treeData[0];
+  // Mục đang chọn (nếu file chờ duyệt vừa hết câu → quay về mục "Câu hỏi chờ kiểm duyệt"; nếu mục cũ không còn → về "Tất cả")
+  const activeNode =
+    findNode(treeData, folderId) ??
+    (isPendingFolderId(folderId) ? findNode(treeData, PENDING_ID) : undefined) ??
+    treeData[0];
   const activeFolderId = activeNode?.id ?? "all";
-  const isPendingView = activeFolderId === PENDING_ID;
+  const isPendingView = isPendingFolderId(activeFolderId);
+  const pendingFileFilter = pendingFileFromId(activeFolderId);
   const pendingIdSet = useMemo(() => new Set(pendingQuestions.map((q) => q.id)), [pendingQuestions]);
 
   // Được yêu cầu chuyển mục từ bên ngoài (vd. vừa nhập đề xong -> mở mục chờ kiểm duyệt)
@@ -160,9 +164,11 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
   const folderQuestions = useMemo(
     () =>
       isPendingView
-        ? pendingQuestions.map((q, i) => ({ ...q, number: i + 1 }))
+        ? pendingQuestions
+            .filter((q) => !pendingFileFilter || (q.sourceFile?.trim() || "Chưa rõ nguồn") === pendingFileFilter)
+            .map((q, i) => ({ ...q, number: i + 1 }))
         : questions.filter((q) => belongsTo(q, activeFolderId)).map((q, i) => ({ ...q, number: i + 1 })),
-    [questions, pendingQuestions, activeFolderId, isPendingView],
+    [questions, pendingQuestions, activeFolderId, isPendingView, pendingFileFilter],
   );
 
   const filteredBase = useMemo(
@@ -177,8 +183,8 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
       isPendingView && onlyDup ? filteredBase.filter((q) => (duplicates[q.id]?.length ?? 0) > 0) : filteredBase,
     [filteredBase, isPendingView, onlyDup, duplicates],
   );
-  const dupBlockingCount = pendingQuestions.filter((q) => hasBlocking(duplicates[q.id])).length;
-  const dupLabelCount = pendingQuestions.filter((q) => (duplicates[q.id]?.length ?? 0) > 0 && !hasBlocking(duplicates[q.id])).length;
+  const dupBlockingCount = (isPendingView ? folderQuestions : pendingQuestions).filter((q) => hasBlocking(duplicates[q.id])).length;
+  const dupLabelCount = (isPendingView ? folderQuestions : pendingQuestions).filter((q) => (duplicates[q.id]?.length ?? 0) > 0 && !hasBlocking(duplicates[q.id])).length;
   useEffect(() => {
     if (onlyDup && dupBlockingCount + dupLabelCount === 0) setOnlyDup(false);
   }, [onlyDup, dupBlockingCount, dupLabelCount]);
@@ -523,8 +529,10 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
             treeData={treeData}
             selectedFolderId={activeFolderId}
             onSelectFolder={(id) => {
-              // đổi qua/lại giữa mục kiểm duyệt và ngân hàng: bỏ chọn để không lẫn lộn câu chờ duyệt với câu trong ngân hàng
-              if ((id === PENDING_ID) !== isPendingView) setSelectedIds(new Set());
+              // đổi qua/lại giữa mục kiểm duyệt và ngân hàng (hoặc đổi file chờ duyệt): bỏ chọn để không lẫn lộn
+              if (isPendingFolderId(id) !== isPendingView || (isPendingFolderId(id) && id !== activeFolderId)) {
+                setSelectedIds(new Set());
+              }
               setFolderId(id);
               setPage(1);
             }}
@@ -548,7 +556,10 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
               <div className="flex items-start gap-2">
                 <ClipboardCheck className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
                 <p className="leading-relaxed">
-                  <strong>Câu hỏi chờ kiểm duyệt:</strong> các câu mới nhập từ file LaTeX chưa thuộc ngân hàng. Mở từng câu để xem, sửa nội dung /
+                  <strong>
+                    Câu hỏi chờ kiểm duyệt{pendingFileFilter ? ` – ${pendingFileFilter}` : ""}:
+                  </strong>{" "}
+                  các câu mới nhập từ file LaTeX chưa thuộc ngân hàng. Mở từng câu để xem, sửa nội dung /
                   gắn ID rồi bấm <b>DUYỆT</b>; hoặc tích chọn nhiều câu để duyệt hàng loạt (câu nghi trùng sẽ được bỏ qua để bạn xem lại).
                   {noIdInList > 0 && <> {noIdInList} câu chưa có ID hợp lệ vẫn duyệt được và sẽ nằm ở mục “Chưa gắn ID / Lỗi ID”.</>}
                 </p>

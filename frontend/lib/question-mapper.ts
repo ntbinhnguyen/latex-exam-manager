@@ -28,5 +28,6 @@ export function mapBackendQuestion(q: Question, idx: number): QuestionItem {
     raw,
     solution: q.extracted_solution ?? parsed?.solution ?? undefined,
     answer: q.extracted_answer ?? parsed?.answer ?? undefined,
+    sourceFile: q.source_material ?? undefined,
   };
 }

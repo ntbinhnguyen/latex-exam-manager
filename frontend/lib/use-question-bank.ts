@@ -272,9 +272,9 @@ export function useQuestionBank() {
           questions.map((q) => q.code),
         ),
         questions,
-        pending.length,
+        pending,
       ),
-    [activeTree, questions, pending.length],
+    [activeTree, questions, pending],
   );
   const nodeMap = useMemo(() => new Map(flattenTree(tree).map((n) => [n.id, n])), [tree]);
   // gồm cả câu chờ kiểm duyệt để xem / sửa / gắn ID ngay trong mục kiểm duyệt

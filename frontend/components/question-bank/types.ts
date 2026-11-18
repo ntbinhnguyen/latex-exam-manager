@@ -52,6 +52,8 @@ export interface QuestionItem {
   answer?: string;
   isSelected?: boolean;
   chapter?: string;
+  /** Tên file .tex nguồn khi nhập (dùng để phân loại câu chờ kiểm duyệt theo file) */
+  sourceFile?: string;
 }
 
 export type ViewMode = "grid" | "list";
