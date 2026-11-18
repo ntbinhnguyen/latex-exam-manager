@@ -17,6 +17,7 @@ import {
   FileText,
   FileSpreadsheet,
   Trash2,
+  Tag,
 } from "lucide-react";
 import { ViewMode, SortOption, DifficultyLevel, QuestionType } from "./types";
 
@@ -40,6 +41,7 @@ interface TopToolbarProps {
   onResetFilters: () => void;
   onExport: (format: "latex" | "docx" | "pdf" | "excel") => void;
   onBulkDelete: () => void;
+  onBulkChangeId?: () => void;
 }
 
 export const TopToolbar: React.FC<TopToolbarProps> = ({
@@ -62,6 +64,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
   onResetFilters,
   onExport,
   onBulkDelete,
+  onBulkChangeId,
 }) => {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showExportDropdown, setShowExportDropdown] = useState(false);
@@ -134,7 +137,17 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
 
       {/* Right Actions: Row of action buttons outlined with borders */}
       <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
-        {/* NÚT XÓA NHIỀU CÂU HỎI (Chỉ hiện khi có câu được chọn) */}
+        {/* NÚT ĐỔI ID & XÓA NHIỀU CÂU HỎI (Chỉ hiện khi có câu được chọn) */}
+        {selectedCount > 0 && onBulkChangeId && (
+          <button
+            type="button"
+            onClick={onBulkChangeId}
+            className="h-9 px-3 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-[#4A0E17] bg-amber-50 border border-amber-300 hover:border-amber-400 hover:bg-amber-100 rounded-md shadow-2xs transition"
+          >
+            <Tag className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">ĐỔI ID ({selectedCount})</span>
+          </button>
+        )}
         {selectedCount > 0 && (
           <button
             type="button"

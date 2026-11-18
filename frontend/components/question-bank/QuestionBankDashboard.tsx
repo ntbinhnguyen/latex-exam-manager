@@ -17,6 +17,7 @@ import { SidebarTree } from "./SidebarTree";
 import { StatsPanel } from "./StatsPanel";
 import { QuestionGrid } from "./QuestionGrid";
 import { QuestionDetailModal } from "./QuestionDetailModal";
+import { BulkQidModal } from "./BulkQidModal";
 import { PENDING_ID, belongsTo, findNode, hasValidId } from "@/lib/tree";
 import { DUP_LABEL, hasBlocking, isBlockingKind, worstMatch } from "@/lib/duplicates";
 import type { TreeMode } from "@/lib/use-question-bank";
@@ -250,6 +251,32 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
     showToast(`Đã gắn ID ${code}.`);
   };
 
+  const [bulkQidOpen, setBulkQidOpen] = useState(false);
+
+  const handleBulkSaveId = async (updates: { id: string; code: string }[]) => {
+    if (!onSaveId) return { success: 0, failed: updates.length, lastError: "Chức năng đổi ID chưa được hỗ trợ." };
+    let success = 0;
+    let failed = 0;
+    let lastError = "";
+    for (const { id, code } of updates) {
+      try {
+        await onSaveId(id, code);
+        success++;
+      } catch (error) {
+        failed++;
+        lastError = error instanceof Error ? error.message : String(error);
+      }
+    }
+    if (success > 0) {
+      showToast(
+        failed > 0
+          ? `Đã đổi ID ${success} câu, ${failed} câu thất bại: ${lastError}`
+          : `Đã đổi ID thành công cho ${success} câu hỏi.`,
+      );
+    }
+    return { success, failed, lastError };
+  };
+
   const handleDelete = async (id: string) => {
     const idx = filtered.findIndex((q) => q.id === id);
     const nextId = idx >= 0 ? (filtered[idx + 1]?.id ?? filtered[idx - 1]?.id ?? null) : null;
@@ -479,6 +506,7 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
           onResetFilters={handleResetFilters}
           onExport={handleExport}
           onBulkDelete={isPendingView ? handleRejectSelected : handleBulkDelete}
+          onBulkChangeId={onSaveId ? () => setBulkQidOpen(true) : undefined}
         />
       </div>
 
@@ -632,6 +660,17 @@ export const QuestionBankDashboard: React.FC<QuestionBankDashboardProps> = ({
           onDismissDup={isPendingView && onDismissDuplicates ? handleDismissDup : undefined}
           onReplaceDup={isPendingView && onReplaceWithPending ? handleReplaceDup : undefined}
           onRejectNew={isPendingView && onRejectPending ? handleRejectOne : undefined}
+        />
+      )}
+      {bulkQidOpen && selectedIds.size > 0 && (
+        <BulkQidModal
+          questions={Array.from(selectedIds)
+            .map((id) => allById.get(id))
+            .filter((q): q is QuestionItem => Boolean(q))}
+          treeData={treeData}
+          suggestId={!isPendingView && findNode(treeData, activeFolderId)?.kind ? activeFolderId : undefined}
+          onApply={handleBulkSaveId}
+          onClose={() => setBulkQidOpen(false)}
         />
       )}
     </div>
