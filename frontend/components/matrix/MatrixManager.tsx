@@ -56,7 +56,7 @@ const KHO_KEY = "qb.matrix.kho.v1";
 
 const GRID = "grid grid-cols-[48px_minmax(170px,1fr)_128px_96px_minmax(200px,1.1fr)_40px] gap-1.5 items-center";
 
-type ModalKind = null | "custom" | "preview" | "save" | "kho-template" | "kho-open";
+type ModalKind = null | "custom" | "preview" | "preview-selected" | "save" | "kho-template" | "kho-open";
 
 const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
@@ -554,6 +554,19 @@ export function MatrixManager() {
             <button
               type="button"
               className={btnFoot}
+              onClick={() => {
+                if (filledList.length === 0) {
+                  notify("Chưa có câu hỏi nào trong ma trận để xem trước.");
+                  return;
+                }
+                setModal("preview-selected");
+              }}
+            >
+              <Eye className="h-3.5 w-3.5" /> XEM TRƯỚC ({filledList.length})
+            </button>
+            <button
+              type="button"
+              className={btnFoot}
               onClick={() => exportMatrixXlsx({ rows, qById: questionMap, nodeMap }, "ma-tran-de")}
             >
               <FileSpreadsheet className="h-3.5 w-3.5" /> XUẤT EXCEL
@@ -649,8 +662,13 @@ export function MatrixManager() {
         />
       )}
 
-      {modal === "preview" && (
-        <PreviewModal rows={rows} questionMap={questionMap} onClose={() => setModal(null)} />
+      {(modal === "preview" || modal === "preview-selected") && (
+        <PreviewModal
+          rows={rows}
+          questionMap={questionMap}
+          defaultOnlyFilled={modal === "preview-selected"}
+          onClose={() => setModal(null)}
+        />
       )}
 
       {modal === "save" && <SaveModal kho={kho} onSave={saveToKho} onClose={() => setModal(null)} />}
@@ -714,32 +732,46 @@ function CustomizeModal({ initial, onApply, onClose }: { initial: Counts; onAppl
 function PreviewModal({
   rows,
   questionMap,
+  defaultOnlyFilled = false,
   onClose,
 }: {
   rows: MatrixRow[];
   questionMap: Map<string, QuestionItem>;
+  defaultOnlyFilled?: boolean;
   onClose: () => void;
 }) {
   const [answers, setAnswers] = useState(false);
+  const [onlyFilled, setOnlyFilled] = useState(defaultOnlyFilled);
+  const filledCount = rows.filter((r) => r.questionId && questionMap.has(r.questionId)).length;
   let n = 0;
   return (
     <Modal
-      title="Xem trước toàn bộ đề"
+      title={onlyFilled ? `Xem trước các câu hỏi đã chọn (${filledCount} câu)` : "Xem trước toàn bộ đề"}
       widthClass="max-w-4xl"
       onClose={onClose}
       headerExtra={
-        <label className="flex items-center gap-1.5 text-xs font-normal">
-          <input type="checkbox" checked={answers} onChange={(e) => setAnswers(e.target.checked)} /> Hiện đáp án & lời giải
-        </label>
+        <div className="flex flex-wrap items-center gap-4 text-xs font-normal">
+          <label className="flex cursor-pointer items-center gap-1.5">
+            <input type="checkbox" checked={onlyFilled} onChange={(e) => setOnlyFilled(e.target.checked)} /> Chỉ câu đã chọn
+          </label>
+          <label className="flex cursor-pointer items-center gap-1.5">
+            <input type="checkbox" checked={answers} onChange={(e) => setAnswers(e.target.checked)} /> Hiện đáp án &amp; lời giải
+          </label>
+        </div>
       }
     >
       <div className="space-y-5">
+        {onlyFilled && filledCount === 0 && (
+          <p className="py-10 text-center text-sm text-gray-500">Chưa có câu hỏi nào được chọn trong ma trận.</p>
+        )}
         {SLOT_TYPES.map((t) => {
-          const items = rows.filter((r) => r.type === t);
+          const items = rows.filter((r) => r.type === t && (!onlyFilled || (r.questionId && questionMap.has(r.questionId))));
           if (!items.length) return null;
           return (
             <div key={t}>
-              <div className="mb-2 inline-block rounded bg-[#F2A60C] px-3 py-1 text-xs font-bold text-slate-900">{t}</div>
+              <div className="mb-2 inline-block rounded bg-[#F2A60C] px-3 py-1 text-xs font-bold text-slate-900">
+                {t} ({items.length} câu)
+              </div>
               <div className="space-y-4">
                 {items.map((r) => {
                   n++;
