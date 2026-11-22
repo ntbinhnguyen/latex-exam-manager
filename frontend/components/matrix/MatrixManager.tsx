@@ -38,6 +38,7 @@ import { TopicPickerModal } from "./TopicPickerModal";
 import {
   SLOT_TYPES,
   THPTQG,
+  blankRow,
   countRows,
   effectiveLevel,
   makeRows,
@@ -49,12 +50,13 @@ import {
   type Counts,
   type MatrixRow,
   type SavedMatrix,
+  type SlotType,
 } from "./types";
 
 const CURRENT_KEY = "qb.matrix.current.v1";
 const KHO_KEY = "qb.matrix.kho.v1";
 
-const GRID = "grid grid-cols-[48px_minmax(170px,1fr)_128px_96px_minmax(200px,1.1fr)_40px] gap-1.5 items-center";
+const GRID = "grid grid-cols-[48px_minmax(170px,1fr)_128px_96px_minmax(200px,1.1fr)_40px_36px] gap-1.5 items-center";
 
 type ModalKind = null | "custom" | "preview" | "preview-selected" | "save" | "kho-template" | "kho-open";
 
@@ -69,6 +71,7 @@ export function MatrixManager() {
   const [mode, setMode] = useState<"manual" | "random">("manual");
   const [pickerRow, setPickerRow] = useState<string | null>(null);
   const [topicRow, setTopicRow] = useState<string | null>(null);
+  const [addTopicModal, setAddTopicModal] = useState<{ type: SlotType; allowChangeType: boolean } | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [modal, setModal] = useState<ModalKind>(null);
   const [fileMenu, setFileMenu] = useState(false);
@@ -242,6 +245,78 @@ export function MatrixManager() {
     );
   };
 
+  const removeRow = (rowId: string) => {
+    setRows((rs) => rs.filter((r) => r.id !== rowId));
+    notify("Đã xóa dòng dạng toán khỏi ma trận.");
+  };
+
+  const buildTopicRows = (
+    topicId: string | null,
+    type: SlotType,
+    counts: Record<DifficultyLevel, number>,
+    excludeIds: Set<string>,
+  ): MatrixRow[] => {
+    const totalReq = counts[1] + counts[2] + counts[3] + counts[4];
+    if (totalReq === 0) {
+      return [syncRowLevel({ ...blankRow(type), topicId })];
+    }
+    const created: MatrixRow[] = [];
+    const used = new Set(excludeIds);
+    ([1, 2, 3, 4] as DifficultyLevel[]).forEach((lv) => {
+      const need = counts[lv];
+      if (need <= 0) return;
+      const pool = questions.filter(
+        (q) =>
+          normType(q.type) === type &&
+          !used.has(q.id) &&
+          q.level === lv &&
+          (!topicId || belongsTo(q, topicId)),
+      );
+      for (let i = 0; i < need; i++) {
+        if (pool.length > 0) {
+          const idx = Math.floor(Math.random() * pool.length);
+          const q = pool.splice(idx, 1)[0];
+          used.add(q.id);
+          created.push(withQuestion({ ...blankRow(type), topicId, level: lv }, q));
+        } else {
+          created.push(syncRowLevel({ ...blankRow(type), topicId, level: lv }));
+        }
+      }
+    });
+    return created;
+  };
+
+  const handleTopicApply = (res: {
+    topicId: string | null;
+    type: SlotType;
+    counts: Record<DifficultyLevel, number>;
+  }) => {
+    const totalReq = res.counts[1] + res.counts[2] + res.counts[3] + res.counts[4];
+    if (topicTarget) {
+      const targetId = topicTarget.id;
+      setTopicRow(null);
+      if (totalReq === 0) {
+        onTopicPick(targetId, res.topicId);
+        return;
+      }
+      const nextRows = buildTopicRows(res.topicId, res.type, res.counts, usedByOthers(targetId));
+      setRows((rs) => rs.flatMap((r) => (r.id === targetId ? nextRows : [r])));
+      notify(`Đã cập nhật ${nextRows.length} câu từ dạng toán đã chọn.`);
+      return;
+    }
+    if (addTopicModal) {
+      setAddTopicModal(null);
+      const usedAll = new Set(rows.filter((r) => r.questionId).map((r) => r.questionId as string));
+      const nextRows = buildTopicRows(res.topicId, res.type, res.counts, usedAll);
+      setRows((rs) => [...rs, ...nextRows]);
+      notify(
+        totalReq > 0
+          ? `Đã thêm ${nextRows.length} câu (${res.type}) vào ma trận.`
+          : `Đã thêm 1 dòng dạng toán (${res.type}) vào ma trận.`,
+      );
+    }
+  };
+
   // thống kê
   const stats = useMemo(() => {
     let low = 0;
@@ -409,6 +484,14 @@ export function MatrixManager() {
             <button
               type="button"
               className={btnWhite}
+              onClick={() => setAddTopicModal({ type: "Trắc nghiệm", allowChangeType: true })}
+              title="Thêm dạng toán mới vào ma trận"
+            >
+              <Plus className="h-3.5 w-3.5 text-[#4A0E17]" /> Thêm dạng toán
+            </button>
+            <button
+              type="button"
+              className={btnWhite}
               onClick={() => {
                 const first = rows.find((r) => !r.questionId);
                 if (first) setPickerRow(first.id);
@@ -436,6 +519,7 @@ export function MatrixManager() {
                 </div>
               ))}
               <span />
+              <span />
             </div>
 
             {rows.length === 0 && (
@@ -447,7 +531,17 @@ export function MatrixManager() {
             {sections.map((sec) => (
               <div key={sec.type} className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="rounded bg-[#F2A60C] px-3 py-1 text-[11px] font-bold text-slate-900">{sec.type}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded bg-[#F2A60C] px-3 py-1 text-[11px] font-bold text-slate-900">{sec.type}</span>
+                    <button
+                      type="button"
+                      onClick={() => setAddTopicModal({ type: sec.type, allowChangeType: false })}
+                      className="flex items-center gap-1 rounded border border-[#4A0E17]/30 bg-white px-2 py-0.5 text-[10.5px] font-bold text-[#4A0E17] transition hover:bg-[#4A0E17]/5"
+                      title={`Thêm dạng toán vào phần ${sec.type}`}
+                    >
+                      <Plus className="h-3 w-3" /> Thêm
+                    </button>
+                  </div>
                   <span className="text-[11px] text-gray-500">{sec.items.length} câu</span>
                 </div>
 
@@ -536,6 +630,16 @@ export function MatrixManager() {
                         className="flex h-9 w-9 items-center justify-center rounded bg-[#4A0E17] text-white transition hover:bg-[#5d1420]"
                       >
                         {mode === "manual" ? <CheckSquare className="h-4 w-4" /> : <Dices className="h-4 w-4" />}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => removeRow(r.id)}
+                        title="Xóa dòng dạng toán này"
+                        aria-label="Xóa dòng"
+                        className="flex h-9 w-9 items-center justify-center rounded border border-rose-200 bg-white text-rose-600 transition hover:bg-rose-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   );
@@ -660,12 +764,24 @@ export function MatrixManager() {
         />
       )}
 
-      {topicTarget && (
+      {(topicTarget || addTopicModal) && (
         <TopicPickerModal
           tree={tree}
-          currentId={topicTarget.topicId}
-          onPick={(id) => onTopicPick(topicTarget.id, id)}
-          onClose={() => setTopicRow(null)}
+          questions={questions}
+          usedQuestionIds={
+            topicTarget
+              ? usedByOthers(topicTarget.id)
+              : new Set(rows.filter((r) => r.questionId).map((r) => r.questionId as string))
+          }
+          currentId={topicTarget ? topicTarget.topicId : null}
+          defaultType={topicTarget ? topicTarget.type : addTopicModal!.type}
+          allowChangeType={Boolean(addTopicModal?.allowChangeType)}
+          mode={topicTarget ? "pick-row" : "add"}
+          onApply={handleTopicApply}
+          onClose={() => {
+            setTopicRow(null);
+            setAddTopicModal(null);
+          }}
         />
       )}
 
