@@ -2,6 +2,16 @@
 
 import React from "react";
 import { BarChart3 } from "lucide-react";
+import type { SlotType } from "./types";
+
+export type LevelCounts = Record<1 | 2 | 3 | 4, number>;
+
+export interface TypeLevelSummary {
+  type: SlotType;
+  levels: LevelCounts;
+  unrated: number;
+  total: number;
+}
 
 interface Props {
   total: number;
@@ -11,13 +21,24 @@ interface Props {
   high: number;
   /** tổng mức độ của các câu đã có mức (để tính độ khó) */
   levelSum: number;
+  /** tổng hợp số câu theo từng mức M1–M4 */
+  byLevel: LevelCounts;
+  /** chi tiết số câu theo từng phần (Kiểu câu hỏi × Mức độ) */
+  byType: TypeLevelSummary[];
 }
 
 const TOL = 5; // sai số cho phép so với chuẩn 70/30 (điểm %)
 
 const DIFF_LABELS = ["Dễ", "Trung bình", "Khá", "Khó"];
 
-export const MatrixStats: React.FC<Props> = ({ total, low, high, levelSum }) => {
+const LEVELS: { lv: 1 | 2 | 3 | 4; short: string; label: string; tone: string }[] = [
+  { lv: 1, short: "M1", label: "Nhận biết", tone: "bg-sky-50 text-sky-800 border-sky-200" },
+  { lv: 2, short: "M2", label: "Thông hiểu", tone: "bg-emerald-50 text-emerald-800 border-emerald-200" },
+  { lv: 3, short: "M3", label: "Vận dụng", tone: "bg-amber-50 text-amber-800 border-amber-200" },
+  { lv: 4, short: "M4", label: "VD cao", tone: "bg-[#4A0E17]/10 text-[#4A0E17] border-[#4A0E17]/25" },
+];
+
+export const MatrixStats: React.FC<Props> = ({ total, low, high, levelSum, byLevel, byType }) => {
   const rated = low + high;
   const unrated = total - rated;
   const pct = (n: number) => (rated ? Math.round((n / rated) * 100) : 0);
@@ -59,7 +80,62 @@ export const MatrixStats: React.FC<Props> = ({ total, low, high, levelSum }) => 
           </div>
         </div>
 
-        <svg viewBox="0 0 200 200" className="mx-auto w-full max-w-[230px]" role="img" aria-label="Biểu đồ tỉ lệ mức độ">
+        {/* Tổng hợp theo từng mức độ */}
+        <div>
+          <div className="mb-1.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-wide text-gray-500">
+            <span>Tổng hợp mức độ</span>
+            {unrated > 0 && <span className="font-normal normal-case text-amber-700">{unrated} chưa chọn mức</span>}
+          </div>
+          <div className="grid grid-cols-4 gap-1.5">
+            {LEVELS.map((it) => (
+              <div key={it.lv} className={`rounded border px-1.5 py-1.5 text-center ${it.tone}`}>
+                <div className="text-[10px] font-bold">{it.short}</div>
+                <div className="text-base font-bold leading-tight tabular-nums">{byLevel[it.lv]}</div>
+                <div className="truncate text-[9.5px] opacity-80">{it.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Chi tiết từng phần theo Kiểu câu hỏi × Mức độ */}
+        {byType.length > 0 && (
+          <div>
+            <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-500">
+              Theo từng phần
+            </div>
+            <div className="overflow-hidden rounded border border-gray-200">
+              <table className="w-full text-[11px]">
+                <thead className="bg-[#F6F3F2] text-gray-600">
+                  <tr>
+                    <th className="px-2 py-1.5 text-left font-bold">Kiểu</th>
+                    <th className="px-1.5 py-1.5 text-right font-bold">M1</th>
+                    <th className="px-1.5 py-1.5 text-right font-bold">M2</th>
+                    <th className="px-1.5 py-1.5 text-right font-bold">M3</th>
+                    <th className="px-1.5 py-1.5 text-right font-bold">M4</th>
+                    <th className="px-2 py-1.5 text-right font-bold">Tổng</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {byType.map((row) => (
+                    <tr key={row.type} className="hover:bg-gray-50">
+                      <td className="px-2 py-1.5 font-semibold text-gray-800">{row.type}</td>
+                      {([1, 2, 3, 4] as const).map((lv) => (
+                        <td key={lv} className="px-1.5 py-1.5 text-right tabular-nums text-gray-700">
+                          {row.levels[lv] || <span className="text-gray-300">–</span>}
+                        </td>
+                      ))}
+                      <td className="px-2 py-1.5 text-right font-bold tabular-nums text-[#4A0E17]">
+                        {row.total}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <svg viewBox="0 0 200 200" className="mx-auto w-full max-w-[200px]" role="img" aria-label="Biểu đồ tỉ lệ mức độ">
           <circle cx="100" cy="100" r={R} fill="none" stroke="#EAEAEA" strokeWidth="38" />
           {rated > 0 && (
             <g transform="rotate(-90 100 100)">
@@ -103,7 +179,7 @@ export const MatrixStats: React.FC<Props> = ({ total, low, high, levelSum }) => 
           </div>
           {unrated > 0 && (
             <p className="text-[11px] leading-snug text-gray-400">
-              {unrated} câu chưa chọn mức độ (không tính vào thống kê)
+              {unrated} câu chưa chọn mức độ (không tính vào tỉ lệ 70/30)
             </p>
           )}
         </div>

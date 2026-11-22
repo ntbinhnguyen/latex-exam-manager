@@ -48,36 +48,26 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ stats }) => {
           </div>
         </div>
 
-        {/* 3. Question Type Breakdown: Kiểu / Số câu */}
-        <div className="flex flex-col gap-1 text-[11px] sm:text-xs">
-          {/* Header Row: Kiểu, Trắc nghiệm, Đúng sai, Trả lời ngắn, Tự luận */}
-          <div className="flex items-center gap-1 text-center">
+        {/* 3. Question Type Breakdown: Kiểu / Số câu (mỗi cặp là một cột để luôn thẳng hàng) */}
+        <div className="flex items-stretch gap-1 text-[11px] sm:text-xs text-center">
+          <div className="flex flex-col gap-1">
             <span className="w-12 h-6 flex items-center justify-center border border-gray-300 rounded text-slate-700 font-medium bg-gray-50/60">
               Kiểu
             </span>
-            {stats.questionTypes.map((t) => (
-              <span
-                key={t.type}
-                className="px-2 sm:px-2.5 h-6 flex items-center justify-center border border-gray-300 rounded text-slate-800 font-medium whitespace-nowrap"
-              >
-                {t.type}
-              </span>
-            ))}
-          </div>
-          {/* Data Row: Số câu, [34], [2], [0], [0] */}
-          <div className="flex items-center gap-1 text-center">
             <span className="w-12 h-6 flex items-center justify-center border border-gray-300 rounded text-slate-700 font-medium bg-gray-50/60">
               Số câu
             </span>
-            {stats.questionTypes.map((t) => (
-              <span
-                key={t.type}
-                className="flex-1 h-6 flex items-center justify-center bg-[#4A0E17] text-white font-bold rounded shadow-2xs min-w-8"
-              >
+          </div>
+          {stats.questionTypes.map((t) => (
+            <div key={t.type} className="flex flex-col gap-1">
+              <span className="px-2 sm:px-2.5 h-6 flex items-center justify-center border border-gray-300 rounded text-slate-800 font-medium whitespace-nowrap">
+                {t.type}
+              </span>
+              <span className="w-full h-6 px-2 flex items-center justify-center bg-[#4A0E17] text-white font-bold rounded shadow-2xs tabular-nums">
                 {t.count}
               </span>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
         {/* 4. Total Count: Tổng / [36] */}

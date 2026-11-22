@@ -32,7 +32,7 @@ import { LatexRenderer } from "@/components/question-bank/LatexRenderer";
 import { QuestionBody } from "@/components/question-bank/QuestionBody";
 import { QuestionDetailModal } from "@/components/question-bank/QuestionDetailModal";
 import type { DifficultyLevel, QuestionItem } from "@/components/question-bank/types";
-import { MatrixStats } from "./MatrixStats";
+import { MatrixStats, type LevelCounts, type TypeLevelSummary } from "./MatrixStats";
 import { QuestionPickerModal } from "./QuestionPickerModal";
 import { TopicPickerModal } from "./TopicPickerModal";
 import {
@@ -247,14 +247,27 @@ export function MatrixManager() {
     let low = 0;
     let high = 0;
     let sum = 0;
+    const byLevel: LevelCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    const typeMap = new Map<SlotType, TypeLevelSummary>();
+    SLOT_TYPES.forEach((t) =>
+      typeMap.set(t, { type: t, levels: { 1: 0, 2: 0, 3: 0, 4: 0 }, unrated: 0, total: 0 }),
+    );
     rows.forEach((r) => {
       const lv = effectiveLevel(r, r.questionId ? questionMap.get(r.questionId) : undefined);
-      if (!lv) return;
+      const entry = typeMap.get(r.type);
+      if (entry) entry.total++;
+      if (!lv) {
+        if (entry) entry.unrated++;
+        return;
+      }
+      byLevel[lv]++;
+      if (entry) entry.levels[lv]++;
       sum += lv;
       if (lv <= 2) low++;
       else high++;
     });
-    return { low, high, sum };
+    const byType = SLOT_TYPES.map((t) => typeMap.get(t)!).filter((x) => x.total > 0);
+    return { low, high, sum, byLevel, byType };
   }, [rows, questionMap]);
 
   const rowNumber = (row: MatrixRow) => rows.filter((r) => r.type === row.type).findIndex((r) => r.id === row.id) + 1;
@@ -612,7 +625,14 @@ export function MatrixManager() {
 
       {/* ===== Cột phải: Thống kê ===== */}
       <aside className="w-full shrink-0 lg:sticky lg:top-4 lg:w-[330px]">
-        <MatrixStats total={rows.length} low={stats.low} high={stats.high} levelSum={stats.sum} />
+        <MatrixStats
+          total={rows.length}
+          low={stats.low}
+          high={stats.high}
+          levelSum={stats.sum}
+          byLevel={stats.byLevel}
+          byType={stats.byType}
+        />
       </aside>
 
       {/* ===== Các hộp thoại ===== */}
