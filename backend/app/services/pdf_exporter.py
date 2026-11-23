@@ -545,6 +545,96 @@ def _exam_codes(start_code: str, count: int, rng: Optional[random.Random] = None
     return [f"{prefix}{i + 1}" for i in range(count)]
 
 
+MODE_CONFIG: Dict[str, Tuple[bool, bool, str]] = {
+    "exam": (False, False, "de"),
+    "answers": (True, False, "dap-an"),
+    "solutions": (True, True, "loi-giai"),
+}
+
+
+def compile_export_bundle(
+    items: Sequence[tuple],
+    modes: Sequence[str] = ("exam",),
+    num_exams: int = 1,
+    title: str = "Đề thi",
+    show_ids: bool = False,
+    group_by_type: bool = True,
+    doc_type: str = "exercise",
+    exam_header: Optional[ExamHeaderInfo] = None,
+    shuffle: bool = False,
+    include_tex: bool = True,
+    base_seed: Optional[int] = None,
+) -> bytes:
+    """Biên dịch 1 hoặc nhiều đề theo các chế độ đã chọn (kèm file .tex nếu bật) và đóng gói thành .zip."""
+    if num_exams < 1 or num_exams > MAX_EXAMS:
+        raise PdfExportError(f"Số đề cần tạo phải từ 1 đến {MAX_EXAMS}.", 400)
+    clean_modes = [m for i, m in enumerate(modes) if m in MODE_CONFIG and m not in modes[:i]]
+    if not clean_modes:
+        raise PdfExportError("Vui lòng chọn ít nhất một chế độ xuất (Chỉ in đề / Đề + Đáp án / Đáp án + Lời giải).", 400)
+    _validate_inputs(items)
+
+    seed0 = base_seed if base_seed is not None else random.SystemRandom().randint(1, 10**9)
+    hdr = exam_header or ExamHeaderInfo()
+    effective_shuffle = shuffle or num_exams > 1
+    passes = 2 if doc_type == "exam" else 1
+
+    if num_exams > 1:
+        codes = _exam_codes(hdr.exam_code or "101", num_exams, rng=random.Random(seed0))
+    elif doc_type == "exam" and hdr.exam_code.strip():
+        codes = [_resolve_exam_code(hdr.exam_code.strip(), random.Random(seed0))]
+    else:
+        codes = [""]
+    has_dup_codes = len(set(codes)) < len(codes)
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for idx, code in enumerate(codes):
+            ver_seed = seed0 + idx
+            ver_header = ExamHeaderInfo(
+                department=hdr.department,
+                school=hdr.school,
+                exam_name=hdr.exam_name,
+                school_year=hdr.school_year,
+                subject=hdr.subject,
+                grade=hdr.grade,
+                duration=hdr.duration,
+                exam_code=code,
+            )
+            if doc_type == "exam" and code:
+                base = f"de-thi-{code}-{idx + 1}" if has_dup_codes else f"de-thi-{code}"
+            elif num_exams > 1:
+                base = f"de-{idx + 1}"
+            else:
+                base = "de-thi" if doc_type == "exam" else "bai-tap"
+
+            for m in clean_modes:
+                sa, sol, m_suffix = MODE_CONFIG[m]
+                ver_title = (
+                    (f"{title} - Mã đề {code}" if title.strip() else f"Mã đề {code}")
+                    if (num_exams > 1 and code)
+                    else title
+                )
+                tex = build_tex(
+                    items,
+                    title=ver_title,
+                    show_answers=sa,
+                    include_solutions=sol,
+                    show_ids=show_ids,
+                    group_by_type=group_by_type,
+                    doc_type=doc_type,
+                    exam_header=ver_header,
+                    shuffle_questions=effective_shuffle,
+                    shuffle_choices=effective_shuffle,
+                    seed=ver_seed,
+                )
+                pdf_bytes = _run_pdflatex(tex, items, passes=passes)
+                stem = f"{base}-{m_suffix}" if len(clean_modes) > 1 else base
+                zf.writestr(f"{stem}.pdf", pdf_bytes)
+                if include_tex:
+                    zf.writestr(f"{stem}.tex", tex.encode("utf-8"))
+    return buf.getvalue()
+
+
 def compile_multi_pdf(
     items: Sequence[tuple],
     num_exams: int,

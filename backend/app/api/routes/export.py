@@ -13,6 +13,7 @@ from app.services.pdf_exporter import (
     MAX_QUESTIONS,
     ExamHeaderInfo,
     PdfExportError,
+    compile_export_bundle,
     compile_multi_pdf,
     compile_pdf,
     pdf_status,
@@ -52,6 +53,8 @@ class PdfExportIn(BaseModel):
     title: str = Field("Câu hỏi được chọn", max_length=200)
     show_answers: bool = False       # tô đậm / đỏ đáp án đúng
     include_solutions: bool = False  # in kèm lời giải
+    modes: Optional[List[Literal["exam", "answers", "solutions"]]] = None
+    include_tex: bool = True         # mặc định xuất kèm file .tex tương ứng
     show_ids: bool = False           # in mã ID nhỏ cạnh số câu
     group_by_type: bool = True       # phân chia PHẦN I, II, III, IV theo loại câu hỏi
     doc_type: Literal["exercise", "exam"] = "exercise"
@@ -60,9 +63,19 @@ class PdfExportIn(BaseModel):
     shuffle: bool = False
 
 
+def _resolve_modes(body: PdfExportIn) -> List[str]:
+    if body.modes is not None:
+        return list(body.modes)
+    if body.show_answers and body.include_solutions:
+        return ["solutions"]
+    if body.show_answers:
+        return ["answers"]
+    return ["exam"]
+
+
 @router.post("/export/questions-pdf")
 def export_questions_pdf(body: PdfExportIn, db: Session = Depends(get_db)):
-    """Biên dịch các câu hỏi được chọn thành file PDF (TeX Live + ex_test.sty)."""
+    """Biên dịch các câu hỏi được chọn thành file PDF (kèm .tex mặc định)."""
     seen, ordered_ids = set(), []
     for i in body.ids:  # bỏ trùng nhưng giữ nguyên thứ tự
         if i not in seen:
@@ -80,19 +93,24 @@ def export_questions_pdf(body: PdfExportIn, db: Session = Depends(get_db)):
     if not items:
         raise HTTPException(status_code=404, detail="Không tìm thấy câu hỏi nào để xuất.")
 
+    modes = _resolve_modes(body)
+    if not modes:
+        raise HTTPException(status_code=400, detail="Vui lòng chọn ít nhất một chế độ xuất.")
+
     hdr = ExamHeaderInfo(**body.exam_header.model_dump()) if body.exam_header else None
     try:
-        if body.num_exams > 1:
-            zip_bytes = compile_multi_pdf(
+        if body.include_tex or body.num_exams > 1 or len(modes) > 1:
+            zip_bytes = compile_export_bundle(
                 items,
+                modes=modes,
                 num_exams=body.num_exams,
                 title=body.title.strip(),
-                show_answers=body.show_answers,
-                include_solutions=body.include_solutions,
                 show_ids=body.show_ids,
                 group_by_type=body.group_by_type,
                 doc_type=body.doc_type,
                 exam_header=hdr,
+                shuffle=body.shuffle,
+                include_tex=body.include_tex,
             )
             filename = f"bo-de-thi-{datetime.now():%Y%m%d-%H%M}.zip"
             return Response(
@@ -101,11 +119,12 @@ def export_questions_pdf(body: PdfExportIn, db: Session = Depends(get_db)):
                 headers={"Content-Disposition": f'attachment; filename="{filename}"'},
             )
 
+        m = modes[0]
         pdf = compile_pdf(
             items,
             title=body.title.strip(),
-            show_answers=body.show_answers,
-            include_solutions=body.include_solutions,
+            show_answers=(m != "exam"),
+            include_solutions=(m == "solutions"),
             show_ids=body.show_ids,
             group_by_type=body.group_by_type,
             doc_type=body.doc_type,

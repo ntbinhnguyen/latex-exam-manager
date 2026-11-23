@@ -77,7 +77,8 @@ export const PdfExportDialog: React.FC<Props> = ({
   defaultDocType = "exercise",
   onClose,
 }) => {
-  const [mode, setMode] = useState<Mode>("exam");
+  const [modes, setModes] = useState<Mode[]>(["exam"]);
+  const [includeTex, setIncludeTex] = useState(true);
   const [docType, setDocType] = useState<DocType>(defaultDocType);
   const [title, setTitle] = useState(defaultTitle);
   const [examHeader, setExamHeader] = useState<ExamHeaderState>(DEFAULT_EXAM_HEADER);
@@ -92,6 +93,10 @@ export const PdfExportDialog: React.FC<Props> = ({
   const tooMany = ids.length > MAX_QUESTIONS;
   const effectiveNumExams = allowMultiExam ? Math.min(MAX_EXAMS, Math.max(1, numExams || 1)) : 1;
   const effectiveShuffle = effectiveNumExams > 1 || shuffle;
+  const isZipBundle = includeTex || effectiveNumExams > 1 || modes.length > 1;
+
+  const toggleMode = (m: Mode) =>
+    setModes((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
 
   const setField = (k: keyof ExamHeaderState, v: string) =>
     setExamHeader((prev) => ({ ...prev, [k]: v }));
@@ -113,8 +118,10 @@ export const PdfExportDialog: React.FC<Props> = ({
           body: JSON.stringify({
             ids,
             title: title.trim(),
-            show_answers: mode !== "exam",
-            include_solutions: mode === "solutions",
+            modes,
+            include_tex: includeTex,
+            show_answers: modes.includes("answers") || modes.includes("solutions"),
+            include_solutions: modes.includes("solutions"),
             show_ids: showIds,
             group_by_type: groupByType,
             doc_type: docType,
@@ -149,13 +156,13 @@ export const PdfExportDialog: React.FC<Props> = ({
         throw new Error(detail);
       }
       const blob = await res.blob();
-      const isZip = effectiveNumExams > 1 || (res.headers.get("content-type") ?? "").includes("zip");
+      const isZip = isZipBundle || (res.headers.get("content-type") ?? "").includes("zip");
       const baseName = docType === "exam" ? examHeader.examName.trim() || "de-kiem-tra" : title.trim() || defaultTitle;
       const name = fileName(baseName, isZip ? "zip" : "pdf");
       downloadBlob(blob, name);
       setDone(
         isZip
-          ? `Đã tạo ${name} (${effectiveNumExams} mã đề, mỗi đề ${ids.length} câu) – file đã được tải xuống.`
+          ? `Đã tạo ${name} (${effectiveNumExams} đề × ${modes.length} chế độ${includeTex ? ", kèm .tex" : ""}) – file đã được tải xuống.`
           : `Đã tạo ${name} (${ids.length} câu) – file đã được tải xuống.`,
       );
     } catch (e) {
@@ -190,11 +197,11 @@ export const PdfExportDialog: React.FC<Props> = ({
           <button
             type="button"
             onClick={run}
-            disabled={busy || ids.length === 0 || tooMany}
+            disabled={busy || ids.length === 0 || tooMany || modes.length === 0}
             className="flex h-9 items-center gap-1.5 rounded bg-[#4A0E17] px-4 text-xs font-bold tracking-wide text-white transition hover:bg-[#5d1420] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileDown className="h-3.5 w-3.5" />}
-            {busy ? "ĐANG BIÊN DỊCH…" : done ? "XUẤT LẠI" : effectiveNumExams > 1 ? `XUẤT ${effectiveNumExams} ĐỀ (.ZIP)` : "XUẤT PDF"}
+            {busy ? "ĐANG BIÊN DỊCH…" : done ? "XUẤT LẠI" : isZipBundle ? "XUẤT FILE (.ZIP)" : "XUẤT PDF"}
           </button>
         </div>
       }
@@ -337,19 +344,31 @@ export const PdfExportDialog: React.FC<Props> = ({
         )}
 
         <fieldset className="space-y-1.5" disabled={busy}>
-          <legend className="mb-1 text-xs font-semibold text-gray-700">Nội dung</legend>
+          <legend className="mb-1 text-xs font-semibold text-gray-700">Nội dung (chọn một hoặc nhiều)</legend>
           {MODES.map((m) => (
             <label key={m.id} className="flex cursor-pointer items-start gap-2 rounded border border-gray-200 px-3 py-2 hover:bg-gray-50">
-              <input type="radio" name="pdf-mode" checked={mode === m.id} onChange={() => setMode(m.id)} className="mt-0.5 accent-[#4A0E17]" />
+              <input
+                type="checkbox"
+                checked={modes.includes(m.id)}
+                onChange={() => toggleMode(m.id)}
+                className="mt-0.5 accent-[#4A0E17]"
+              />
               <span>
                 <span className="block text-sm font-medium">{m.label}</span>
                 <span className="block text-xs text-gray-500">{m.hint}</span>
               </span>
             </label>
           ))}
+          {modes.length === 0 && (
+            <p className="text-[11px] text-rose-600">Vui lòng chọn ít nhất một chế độ xuất.</p>
+          )}
         </fieldset>
 
         <div className="space-y-2">
+          <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-800">
+            <input type="checkbox" checked={includeTex} onChange={(e) => setIncludeTex(e.target.checked)} disabled={busy} className="accent-[#4A0E17]" />
+            Xuất kèm file <code>.tex</code> tương ứng với số đề tạo ra
+          </label>
           <label className="flex cursor-pointer items-center gap-2 text-xs text-gray-700">
             <input type="checkbox" checked={groupByType} onChange={(e) => setGroupByType(e.target.checked)} disabled={busy} className="accent-[#4A0E17]" />
             Phân chia theo phần (PHẦN I, II, III, IV theo loại câu hỏi)
