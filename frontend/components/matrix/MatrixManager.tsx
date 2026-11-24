@@ -28,7 +28,7 @@ import { downloadText } from "@/lib/download";
 import { PdfExportDialog } from "@/components/question-bank/PdfExportDialog";
 import { buildTex, exportMatrixJson, exportMatrixXlsx, importMatrixFile } from "@/lib/matrix-io";
 import { Modal } from "@/components/question-bank/Modal";
-import { LatexRenderer } from "@/components/question-bank/LatexRenderer";
+import { LatexRenderer, InlineLatex } from "@/components/question-bank/LatexRenderer";
 import { QuestionBody } from "@/components/question-bank/QuestionBody";
 import { QuestionDetailModal } from "@/components/question-bank/QuestionDetailModal";
 import type { DifficultyLevel, QuestionItem } from "@/components/question-bank/types";
@@ -562,7 +562,9 @@ export function MatrixManager() {
                         className="flex h-9 items-center gap-2 rounded bg-[#E4E1E0] px-3 text-left text-xs text-slate-700 transition hover:bg-[#d9d5d4]"
                       >
                         <FolderOpen className="h-3.5 w-3.5 shrink-0" />
-                        <span className={`truncate ${topic ? "font-semibold" : ""}`}>{topic ? topic.title : "Tên dạng bài"}</span>
+                        <span className={`truncate leading-normal ${topic ? "font-semibold" : ""}`}>
+                          {topic ? <InlineLatex content={topic.title} /> : "Tên dạng bài"}
+                        </span>
                       </button>
 
                       <div className="flex h-9 items-center justify-center rounded bg-[#F2A60C] text-[11px] font-bold text-slate-900">

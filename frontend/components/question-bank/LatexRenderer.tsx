@@ -292,3 +292,10 @@ export const LatexRenderer: React.FC<LatexRendererProps> = ({ content, className
     />
   );
 };
+
+export const InlineLatex: React.FC<{ content: string; className?: string }> = ({ content, className = "" }) => {
+  const hasTex = /\$|\\\(|\\textbf|\\textit|\\emph/.test(content);
+  const html = useMemo(() => (hasTex ? renderInline(content) : ""), [content, hasTex]);
+  if (!hasTex) return <span className={className}>{content}</span>;
+  return <span className={`latex-content ${className}`} dangerouslySetInnerHTML={{ __html: html }} />;
+};

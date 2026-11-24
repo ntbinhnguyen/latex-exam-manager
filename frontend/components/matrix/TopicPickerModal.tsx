@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { Plus, Layers } from "lucide-react";
 import { Modal } from "@/components/question-bank/Modal";
 import { SidebarTree } from "@/components/question-bank/SidebarTree";
-import { LatexRenderer } from "@/components/question-bank/LatexRenderer";
+import { LatexRenderer, InlineLatex } from "@/components/question-bank/LatexRenderer";
 import type { DifficultyLevel, QuestionItem, TreeNode } from "@/components/question-bank/types";
 import { belongsTo, findNode, withoutPending } from "@/lib/tree";
 import { SLOT_TYPES, normType, type SlotType } from "./types";
@@ -168,8 +168,8 @@ export const TopicPickerModal: React.FC<Props> = ({
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
                 <div className="text-[11px] font-bold uppercase tracking-wide text-gray-400">Dạng toán / Mục đang chọn</div>
-                <div className="mt-0.5 truncate text-sm font-bold text-[#4A0E17]">
-                  {selectedNode ? selectedNode.title : "Toàn bộ ngân hàng"}
+                <div className="mt-0.5 truncate leading-normal text-sm font-bold text-[#4A0E17]">
+                  {selectedNode ? <InlineLatex content={selectedNode.title} /> : "Toàn bộ ngân hàng"}
                 </div>
                 {selectedNode && <div className="font-mono text-[11px] text-gray-500">{selectedNode.id}</div>}
               </div>

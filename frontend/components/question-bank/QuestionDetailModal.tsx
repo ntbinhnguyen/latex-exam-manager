@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Check, CheckCheck, ChevronLeft, ChevronRight, Pencil, Plus, Tag, Trash2 } from "lucide-react";
 import { Modal } from "./Modal";
 import { LevelChips } from "./LevelChips";
+import { InlineLatex } from "./LatexRenderer";
 import { QuestionBody } from "./QuestionBody";
 import { DuplicateComparePanel } from "./DuplicateComparePanel";
 import { QidAssigner, idForType, validateQid } from "./QidAssigner";
@@ -250,7 +251,11 @@ export const QuestionDetailModal: React.FC<Props> = ({
               </span>
             )}
           </div>
-          {trail.length > 0 && <div className="mt-0.5 text-[11px] text-gray-500">{trail.join("  ›  ")}</div>}
+          {trail.length > 0 && (
+            <div className="mt-0.5 text-[11px] text-gray-500">
+              <InlineLatex content={trail.join("  ›  ")} />
+            </div>
+          )}
         </div>
 
         {!editing && (

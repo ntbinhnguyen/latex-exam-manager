@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { InlineLatex } from "./LatexRenderer";
 import type { TreeNode } from "./types";
 import { flattenTree } from "@/lib/tree";
 import {
@@ -258,7 +259,8 @@ export const QidAssigner: React.FC<Props> = ({ type, value, onChange, treeData, 
         </p>
       ) : (
         <p className="flex items-start gap-1.5 text-[11px] text-emerald-700">
-          <CheckCircle2 className="mt-px h-3.5 w-3.5 shrink-0" /> {trail.join("  ›  ")}
+          <CheckCircle2 className="mt-px h-3.5 w-3.5 shrink-0" />
+          <span><InlineLatex content={trail.join("  ›  ")} /></span>
         </p>
       )}
     </div>

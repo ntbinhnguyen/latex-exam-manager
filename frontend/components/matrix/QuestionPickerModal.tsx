@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Modal } from "@/components/question-bank/Modal";
-import { LatexRenderer } from "@/components/question-bank/LatexRenderer";
+import { LatexRenderer, InlineLatex } from "@/components/question-bank/LatexRenderer";
 import type { QuestionItem, TreeNode } from "@/components/question-bank/types";
 import { belongsTo } from "@/lib/tree";
 import { normType, rowLevel, type MatrixRow } from "./types";
@@ -54,7 +54,7 @@ export const QuestionPickerModal: React.FC<Props> = ({ row, rowNumber, questions
           <label className={`flex items-center gap-1.5 ${hasConstraint ? "" : "opacity-50"}`}>
             <input type="checkbox" checked={strict} disabled={!hasConstraint} onChange={(e) => setStrict(e.target.checked)} />
             Chỉ hiện câu đúng dạng bài / mức độ đã chọn
-            {topicTitle ? <em className="not-italic text-gray-400">· {topicTitle}</em> : null}
+            {topicTitle ? <em className="not-italic text-gray-400">· <InlineLatex content={topicTitle} /></em> : null}
             {level ? <em className="not-italic text-gray-400">· Mức {level}</em> : null}
           </label>
           <span>

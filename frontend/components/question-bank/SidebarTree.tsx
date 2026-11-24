@@ -20,6 +20,7 @@ import {
   Hand,
 } from "lucide-react";
 import { TreeNode } from "./types";
+import { InlineLatex } from "./LatexRenderer";
 import type { TreeMode } from "@/lib/use-question-bank";
 import { downloadTreeTemplateXlsx, treeToFlatRows } from "@/lib/tree";
 import { downloadBlob, downloadText } from "@/lib/download";
@@ -190,10 +191,10 @@ export const SidebarTree: React.FC<SidebarTreeProps> = ({
                 )}
 
                 <span
-                  className={`truncate ${isSelected ? "font-semibold text-slate-900" : node.auto ? "font-normal italic text-slate-500" : "font-normal"}`}
+                  className={`truncate leading-normal ${isSelected ? "font-semibold text-slate-900" : node.auto ? "font-normal italic text-slate-500" : "font-normal"}`}
                   title={`${node.title}\n(${node.id})${node.auto ? "\nMục tự sinh – chưa có tên trong file mục lục" : ""}`}
                 >
-                  {node.title}
+                  <InlineLatex content={node.title} />
                 </span>
               </div>
 

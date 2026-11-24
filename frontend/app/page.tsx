@@ -28,6 +28,7 @@ import {
   typeAbbrOfLabel,
 } from "@/lib/qid";
 import type { QuestionItem } from "@/components/question-bank/types";
+import { InlineLatex } from "@/components/question-bank/LatexRenderer";
 import { Alert, Card } from "@/components/ui";
 
 /* ---------- Thống kê theo ID mới: Loại.Mức.Lớp.Chương.Bài.Dạng (VD TN.M1.T2.C1.B1.01) ---------- */
@@ -342,7 +343,7 @@ function FilterBar({
           <div>
             <h2 className="text-sm font-bold tracking-tight text-slate-900">Phạm vi thống kê</h2>
             <p className="mt-0.5 text-xs text-slate-500">
-              Đang xem <strong className="font-semibold text-[#4A0E17]">{scopeLabel}</strong>
+              Đang xem <strong className="font-semibold text-[#4A0E17]"><InlineLatex content={scopeLabel} /></strong>
             </p>
           </div>
         </div>
@@ -374,7 +375,7 @@ function FilterBar({
         </button>
         {grades.map((g) => (
           <button key={g.id} type="button" aria-pressed={grade === g.id} onClick={() => onGrade(g.id)} className={chip(grade === g.id)}>
-            {g.title}
+            <InlineLatex content={g.title} />
           </button>
         ))}
       </div>
@@ -798,8 +799,8 @@ export default function Dashboard() {
                             >
                               <span className="w-24 shrink-0 font-mono text-[11px] text-slate-400">{n.id}</span>
                               <span className="min-w-0 flex-1 text-slate-700">
-                                {n.title}
-                                <span className="text-xs text-slate-400"> · {lessonTitleOf(n.id)}</span>
+                                <InlineLatex content={n.title} />
+                                <span className="text-xs text-slate-400"> · <InlineLatex content={lessonTitleOf(n.id)} /></span>
                               </span>
                               {p?.parts.level && (
                                 <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${LEVEL_CHIP[p.parts.level as Lv]}`}>
@@ -840,7 +841,9 @@ export default function Dashboard() {
                               >
                                 {i + 1}
                               </span>
-                              <span className="truncate font-medium text-slate-700">{c.title}</span>
+                              <span className="truncate leading-normal font-medium text-slate-700">
+                                <InlineLatex content={c.title} />
+                              </span>
                             </span>
                             <span className="shrink-0 tabular-nums font-bold text-slate-900">{c.total}</span>
                           </div>
@@ -931,7 +934,7 @@ function ChapterRows({
       {showGrade && (
         <tr className="border-t border-slate-200 bg-slate-50/90">
           <td colSpan={7} className="py-2 pl-2 text-[11px] font-bold uppercase tracking-wider text-[#4A0E17]">
-            {gradeTitle}
+            <InlineLatex content={gradeTitle} />
           </td>
         </tr>
       )}
@@ -944,7 +947,7 @@ function ChapterRows({
               c.id === highlightId ? "bg-[#F2A60C]/10" : "hover:bg-slate-50/80"
             }`}
           >
-            <td className="py-2.5 pr-2 font-medium text-slate-700">{c.title}</td>
+            <td className="py-2.5 pr-2 font-medium text-slate-700"><InlineLatex content={c.title} /></td>
             {LEVELS.map((l) => (
               <td key={l} className="py-2.5 text-right tabular-nums text-slate-600">
                 {lv[l] || <span className="text-slate-300">–</span>}
