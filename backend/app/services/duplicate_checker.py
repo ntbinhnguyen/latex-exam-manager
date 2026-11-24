@@ -238,14 +238,18 @@ def find_duplicates(targets: Iterable[Any], pool: Iterable[Any]) -> Dict[str, Li
                 add(o, op, sim, False)
 
         lt = len(tp.text)
+        t_shingles = tp.shingles
+        t_sh_len = len(t_shingles)
         for idx, (o, op, _) in enumerate(infos):
             if idx in same_idx or str(o.id) == tid:
                 continue
             lo = len(op.text)
             if not lt or not lo or min(lt, lo) / max(lt, lo) < 0.8:
                 continue
-            inter = len(tp.shingles & op.shingles)
-            if inter / max(1, len(tp.shingles | op.shingles)) < 0.5:
+            o_shingles = op.shingles
+            inter = len(t_shingles & o_shingles)
+            union = t_sh_len + len(o_shingles) - inter
+            if union <= 0 or inter / union < 0.5:
                 continue
             sim = similarity(tp, op, CROSS_ID_THRESHOLD)
             if sim >= CROSS_ID_THRESHOLD:

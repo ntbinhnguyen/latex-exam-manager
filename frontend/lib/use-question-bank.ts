@@ -228,10 +228,30 @@ export function useQuestionBank() {
         ids,
         force,
       });
-      await reloadQuestions();
-      return { approved: res.approved, skipped: res.skipped ?? [] };
+      const skipped = res.skipped ?? [];
+      const skippedIds = new Set(skipped.map((s) => s.id));
+      const approvedIds = new Set(ids.filter((id) => !skippedIds.has(id)));
+
+      if (approvedIds.size > 0) {
+        const moved = pending.filter((q) => approvedIds.has(q.id));
+        const remaining = pending.filter((q) => !approvedIds.has(q.id));
+        setPending(remaining);
+        if (moved.length > 0) {
+          setQuestions((prev) => {
+            const existing = new Set(prev.map((q) => q.id));
+            const added = moved.filter((q) => !existing.has(q.id));
+            return added.length > 0 ? [...added, ...prev] : prev;
+          });
+        }
+        if (remaining.length === 0) {
+          setDuplicates({});
+        } else {
+          void refreshDuplicates();
+        }
+      }
+      return { approved: res.approved, skipped };
     },
-    [reloadQuestions],
+    [pending, refreshDuplicates],
   );
 
   /** "Giữ cả hai": xác nhận câu chờ duyệt này KHÔNG trùng các câu đang bị cảnh báo. */
@@ -247,9 +267,20 @@ export function useQuestionBank() {
   const replaceWithPending = useCallback(
     async (id: string, oldId: string) => {
       await post(`/api/questions/pending/${id}/replace`, { old_id: oldId });
-      await reloadQuestions();
+      const newQ = pending.find((q) => q.id === id);
+      const remaining = pending.filter((q) => q.id !== id);
+      setPending(remaining);
+      setQuestions((prev) => {
+        const withoutOld = prev.filter((q) => q.id !== oldId);
+        return newQ ? [newQ, ...withoutOld] : withoutOld;
+      });
+      if (remaining.length === 0) {
+        setDuplicates({});
+      } else {
+        void refreshDuplicates();
+      }
     },
-    [reloadQuestions],
+    [pending, refreshDuplicates],
   );
 
   /** Từ chối các câu chờ duyệt: chuyển vào Thùng rác (vẫn phục hồi được). */

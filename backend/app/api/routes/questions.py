@@ -2,7 +2,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 from uuid import UUID
 from app.core.database import get_db
 from typing import List, Optional
@@ -57,8 +57,21 @@ class ReplaceBody(BaseModel):
 
 
 def _dup_pool(db: Session):
-    """Tập để so sánh: ngân hàng + các câu chờ duyệt (không gồm câu đã xóa)."""
-    return db.query(Question).filter(Question.status != "archived").all()
+    """Tập để so sánh: ngân hàng + các câu chờ duyệt (chỉ tải các cột cần thiết)."""
+    return (
+        db.query(Question)
+        .options(
+            load_only(
+                Question.id,
+                Question.question_code,
+                Question.content_latex,
+                Question.status,
+                Question.dup_dismissed,
+            )
+        )
+        .filter(Question.status != "archived")
+        .all()
+    )
 
 
 def _pending_query(db: Session, ids: Optional[List[UUID]] = None, everything: bool = False):
