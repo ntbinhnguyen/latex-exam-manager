@@ -23,7 +23,7 @@ CACHE_DIR.mkdir(parents=True, exist_ok=True)
 # Nếu có preamble riêng trong main.tex, hãy chép các \usepackage / \usetikzlibrary cần thiết vào đây.
 PREAMBLE = r"""\def\pgfsysdriver{pgfsys-dvisvgm.def}
 \documentclass[tikz,border=4pt]{standalone}
-\usepackage[utf8]{inputenc}
+\usepackage[utf8]{vietnam}
 \usepackage{amsmath,amssymb}
 \usepackage{tkz-tab}
 \usepackage{pgfplots}
