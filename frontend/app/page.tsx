@@ -553,11 +553,18 @@ export default function Dashboard() {
               Quản lý câu hỏi
             </Link>
             <Link
+              href="/matrix"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white backdrop-blur-xs transition hover:bg-white/20"
+            >
+              <Layers className="h-4 w-4" />
+              Ma trận
+            </Link>
+            <Link
               href="/exams"
               className="inline-flex items-center gap-1.5 rounded-xl border border-[#F2A60C]/50 bg-[#F2A60C]/15 px-3.5 py-2 text-xs font-semibold text-[#F2A60C] transition hover:bg-[#F2A60C]/25"
             >
               <FileSpreadsheet className="h-4 w-4" />
-              Ma trận &amp; Sinh đề
+              Sinh đề
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>

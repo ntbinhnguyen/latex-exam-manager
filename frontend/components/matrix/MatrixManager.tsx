@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   CheckCircle2,
   CheckSquare,
@@ -36,9 +37,13 @@ import { MatrixStats, type LevelCounts, type TypeLevelSummary } from "./MatrixSt
 import { QuestionPickerModal } from "./QuestionPickerModal";
 import { TopicPickerModal } from "./TopicPickerModal";
 import {
+  CURRENT_KEY,
+  KHO_KEY,
+  MATRIX_UPDATED_EVENT,
   SLOT_TYPES,
   THPTQG,
   blankRow,
+  consumePendingMatrixRows,
   countRows,
   effectiveLevel,
   makeRows,
@@ -53,9 +58,6 @@ import {
   type SlotType,
 } from "./types";
 
-const CURRENT_KEY = "qb.matrix.current.v1";
-const KHO_KEY = "qb.matrix.kho.v1";
-
 const GRID = "grid grid-cols-[48px_minmax(170px,1fr)_128px_96px_minmax(200px,1.1fr)_40px_36px] gap-1.5 items-center";
 
 type ModalKind = null | "custom" | "preview" | "preview-selected" | "save" | "kho-template" | "kho-open";
@@ -63,11 +65,12 @@ type ModalKind = null | "custom" | "preview" | "preview-selected" | "save" | "kh
 const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 export function MatrixManager() {
+  const pathname = usePathname();
   const bank = useQuestionBank();
   const { questions, questionMap, tree, nodeMap } = bank;
 
   const [rows, setRows] = useState<MatrixRow[]>(() => makeRows(THPTQG));
-  const [restored, setRestored] = useState(false);
+  const canPersistRef = useRef(false);
   const [mode, setMode] = useState<"manual" | "random">("manual");
   const [pickerRow, setPickerRow] = useState<string | null>(null);
   const [topicRow, setTopicRow] = useState<string | null>(null);
@@ -84,24 +87,47 @@ export function MatrixManager() {
     window.setTimeout(() => setToast(null), 3500);
   }, []);
 
-  // khôi phục ma trận đang soạn + kho
+  // Khôi phục ma trận đang soạn + nhận dữ liệu chuyển sang từ trang Ma trận (kể cả khi Next.js giữ cache component)
   useEffect(() => {
-    let alive = true;
-    // đọc localStorage sau khi mount (tránh lệch hydration) – đặt state trong callback bất đồng bộ
-    queueMicrotask(() => {
-      if (!alive) return;
-      const cur = loadJson<MatrixRow[] | null>(CURRENT_KEY, null);
-      if (cur && cur.length > 0) setRows(cur.map((r) => syncRowLevel({ ...r, id: newRowId() })));
-      setKho(loadJson<SavedMatrix[]>(KHO_KEY, []));
-      setRestored(true);
-    });
-    return () => {
-      alive = false;
+    canPersistRef.current = false;
+    const transferred = consumePendingMatrixRows();
+    const sourceRows = transferred ?? loadJson<MatrixRow[] | null>(CURRENT_KEY, null);
+    if (sourceRows && sourceRows.length > 0) {
+      const hydrated = sourceRows.map((r) => syncRowLevel({ ...r, id: newRowId() }));
+      setRows(hydrated);
+      saveJson(CURRENT_KEY, hydrated);
+      if (transferred) {
+        notify(`Đã nạp ${hydrated.length} câu từ trang Ma trận vào Sinh đề.`);
+      }
+    }
+    setKho(loadJson<SavedMatrix[]>(KHO_KEY, []));
+    canPersistRef.current = true;
+
+    const onMatrixUpdated = (ev: Event) => {
+      const incoming = consumePendingMatrixRows() ?? (ev as CustomEvent<MatrixRow[]>).detail;
+      if (incoming && incoming.length > 0) {
+        const hydrated = incoming.map((r) => syncRowLevel({ ...r, id: newRowId() }));
+        setRows(hydrated);
+        saveJson(CURRENT_KEY, hydrated);
+        notify(`Đã nạp ${hydrated.length} câu từ trang Ma trận vào Sinh đề.`);
+      }
     };
-  }, []);
+    window.addEventListener(MATRIX_UPDATED_EVENT, onMatrixUpdated);
+    return () => {
+      canPersistRef.current = false;
+      isFirstSaveSkip.current = true;
+      window.removeEventListener(MATRIX_UPDATED_EVENT, onMatrixUpdated);
+    };
+  }, [pathname, notify]);
+
+  const isFirstSaveSkip = useRef(true);
   useEffect(() => {
-    if (restored) saveJson(CURRENT_KEY, rows);
-  }, [rows, restored]);
+    if (isFirstSaveSkip.current) {
+      isFirstSaveSkip.current = false;
+      return;
+    }
+    if (canPersistRef.current) saveJson(CURRENT_KEY, rows);
+  }, [rows]);
 
   const sections = useMemo(
     () =>
@@ -450,7 +476,7 @@ export function MatrixManager() {
       <section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#4A0E17] bg-[#F3EFEE]">
         <header className="flex flex-wrap items-center justify-between gap-2 bg-[#4A0E17] px-4 py-3 text-white">
           <h1 className="flex items-center gap-2 text-sm font-bold">
-            <LayoutGrid className="h-4 w-4" /> Quản lý ma trận đề
+            <LayoutGrid className="h-4 w-4" /> Sinh đề
           </h1>
           <div className="flex flex-wrap items-center gap-1.5">
             <button type="button" className={btnTop(mode === "manual")} onClick={() => setMode("manual")} title="Bấm nút ở cuối dòng để tự chọn câu hỏi">
@@ -573,8 +599,8 @@ export function MatrixManager() {
 
                       <div className="relative">
                         <select
-                          value={lockedLevel ?? r.level ?? ""}
-                          disabled={lockedLevel !== null}
+                          value={r.level ?? lockedLevel ?? ""}
+                          disabled={lockedLevel !== null && (r.level === null || r.level === lockedLevel)}
                           onChange={(e) => onLevelChange(r, e.target.value)}
                           aria-label={`Mức độ câu ${k + 1} ${r.type}`}
                           title={lockedLevel !== null ? "Mức độ do Dạng toán đã chọn quy định – bỏ chọn dạng bài để đổi" : undefined}

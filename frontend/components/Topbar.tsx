@@ -5,7 +5,8 @@ const titles: Record<string, string> = {
   "/": "Tổng quan",
   "/import": "Nhập đề LaTeX",
   "/questions": "Ngân hàng câu hỏi",
-  "/exams": "Ma trận & Sinh đề",
+  "/matrix": "Ma trận",
+  "/exams": "Sinh đề",
   "/trash": "Thùng rác",
 };
 

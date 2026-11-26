@@ -4,6 +4,38 @@ import { parseNodeId } from "@/lib/qid";
 export type SlotType = "Trắc nghiệm" | "Đúng/Sai" | "Trả lời ngắn" | "Tự luận";
 export const SLOT_TYPES: SlotType[] = ["Trắc nghiệm", "Đúng/Sai", "Trả lời ngắn", "Tự luận"];
 
+export const CURRENT_KEY = "qb.matrix.current.v1";
+export const KHO_KEY = "qb.matrix.kho.v1";
+export const MATRIX_UPDATED_EVENT = "qb:matrix-updated";
+
+let pendingTransferRows: MatrixRow[] | null = null;
+
+/** Ghi ma trận mới vào cả bộ nhớ tạm, localStorage và phát sự kiện đồng bộ sang trang Sinh đề. */
+export function publishMatrixRows(rows: MatrixRow[]): void {
+  pendingTransferRows = rows;
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(CURRENT_KEY, JSON.stringify(rows));
+    } catch {
+      /* ignore */
+    }
+    window.dispatchEvent(new CustomEvent<MatrixRow[]>(MATRIX_UPDATED_EVENT, { detail: rows }));
+  }
+}
+
+export function consumePendingMatrixRows(): MatrixRow[] | null {
+  const r = pendingTransferRows;
+  pendingTransferRows = null;
+  return r;
+}
+
+export function slotTypeFromAbbr(abbr?: string): SlotType {
+  if (abbr === "DS") return "Đúng/Sai";
+  if (abbr === "TLN") return "Trả lời ngắn";
+  if (abbr === "TL") return "Tự luận";
+  return "Trắc nghiệm";
+}
+
 export interface MatrixRow {
   id: string;
   type: SlotType;
@@ -65,10 +97,10 @@ export function topicLevel(topicId: string | null | undefined): DifficultyLevel 
 /** Mức độ đang áp dụng cho dòng: theo Dạng nếu đã chọn Dạng, ngược lại theo mức người dùng chọn. */
 export const rowLevel = (row: MatrixRow): DifficultyLevel | null => topicLevel(row.topicId) ?? row.level;
 
-/** Đồng bộ mức độ lưu trong dòng với Dạng đã chọn (dùng khi nạp từ localStorage / kho / file). */
+/** Đồng bộ mức độ lưu trong dòng với Dạng đã chọn (chỉ tự điền khi dòng chưa có mức độ). */
 export const syncRowLevel = (row: MatrixRow): MatrixRow => {
   const lv = topicLevel(row.topicId);
-  return lv && lv !== row.level ? { ...row, level: lv } : row;
+  return !row.level && lv ? { ...row, level: lv } : row;
 };
 
 export const effectiveLevel = (row: MatrixRow, q?: QuestionItem): DifficultyLevel | null => rowLevel(row) ?? q?.level ?? null;
